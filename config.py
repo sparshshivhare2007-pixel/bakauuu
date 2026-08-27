@@ -11,7 +11,10 @@ load_dotenv()
 # Required Vars
 # ========================
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-MONGO_URL = os.getenv("MONGO_URL")
+
+# MongoDB - Support both MONGO_URL and MONGO_URI
+MONGO_URL = os.getenv("MONGO_URL") or os.getenv("MONGO_URI")
+
 LOG_CHAT_ID = os.getenv("LOG_CHAT_ID")
 BOT_USERNAME = os.getenv("BOT_USERNAME")  # without @
 
@@ -22,7 +25,7 @@ if not BOT_TOKEN:
     raise Exception("❌ BOT_TOKEN not found in .env file")
 
 if not MONGO_URL:
-    raise Exception("❌ MONGO_URL not found in .env file")
+    raise Exception("❌ MONGO_URL not found in .env file. Please set MONGO_URL or MONGO_URI")
 
 if not LOG_CHAT_ID:
     raise Exception("❌ LOG_CHAT_ID not found in .env file")
@@ -39,3 +42,15 @@ except ValueError:
 # Optional / Owner
 # ========================
 OWNER_ID = int(os.getenv("OWNER_ID", "0"))
+
+# Debug - Show MongoDB connection (without password)
+if MONGO_URL:
+    # Hide password in logs
+    if "@" in MONGO_URL:
+        parts = MONGO_URL.split("@")
+        if len(parts) == 2:
+            # Show only first part with masked password
+            masked = parts[0][:parts[0].rfind(":")] + ":****@" + parts[1]
+            print(f"✅ MongoDB URL configured: {masked[:50]}...")
+    else:
+        print(f"✅ MongoDB URL configured: {MONGO_URL[:50]}...")
