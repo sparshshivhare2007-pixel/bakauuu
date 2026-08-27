@@ -24,8 +24,7 @@ except:
 
 # === Fancy font style ===
 def nezuko_style(text):
-    mapping = str.maketrans("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz")
-    return str(text).lower().translate(mapping)
+    return text.lower()
 
 # === AI Models ===
 MODELS = {
@@ -66,7 +65,10 @@ async def call_model_api(provider, messages, max_tokens=50):
             )
             if resp.status_code == 200:
                 return resp.json()["choices"][0]["message"]["content"]
-        except:
+            else:
+                print(f"API Error: {resp.status_code} - {resp.text}")
+        except Exception as e:
+            print(f"API Exception: {e}")
             return None
     return None
 
@@ -85,7 +87,10 @@ async def get_ai_response(chat_id, user_input, user_name, model="mistral"):
 
     msgs = [{"role": "system", "content": prompt}] + history[-6:] + [{"role": "user", "content": user_input}]
 
-    reply = await call_model_api(active_model, msgs, tokens) or "Main thik hu, tum kaise ho? 😊"
+    reply = await call_model_api(active_model, msgs, tokens)
+    
+    if reply is None:
+        reply = "Main thik hu, tum kaise ho? 😊"
 
     # Save history
     if chatbot_collection is not None:
@@ -102,12 +107,16 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if not msg or not msg.text or msg.text.startswith("/"):
         return
 
+    # Check if bot should reply - ONLY "ammu"
     should_reply = (
         update.effective_chat.type == ChatType.PRIVATE
         or (msg.reply_to_message and msg.reply_to_message.from_user.id == context.bot.id)
-        or any(msg.text.lower().startswith(k) for k in ["hey", "hi", "baka"])
+        or msg.text.lower().startswith("ammu")  # Sirf "ammu" se start
+        or "ammu" in msg.text.lower()  # Ya kahin bhi "ammu" ho
     )
+    
     if should_reply:
+        print(f"Replying to: {msg.text}")  # Debug log
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=ChatAction.TYPING)
         res, code = await get_ai_response(update.effective_chat.id, msg.text, msg.from_user.first_name)
 
