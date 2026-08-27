@@ -1,4 +1,4 @@
-# chatbot.py - Thunglish Bot with Smart Memory
+# commands/chatbot.py - Complete file with all functions
 
 import os, random, httpx, logging, hashlib
 from telegram import Update
@@ -25,11 +25,10 @@ try:
     client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
     client.admin.command('ping')
     
-    # Multiple collections for different purposes
     db = client.baka
-    chat_history_collection = db.chat_history  # Full chat history
-    chat_memory_collection = db.chat_memory    # Smart memory for replies
-    user_context_collection = db.user_context  # User context
+    chat_history_collection = db.chat_history
+    chat_memory_collection = db.chat_memory
+    user_context_collection = db.user_context
     
     logger.info("✅ MongoDB connected!")
 except Exception as e:
@@ -54,13 +53,40 @@ THUNGLISH_REPLIES = [
     "Eppadi irukeenga? Naan super! 😊",
     "Enakku romba pidikum ungala pesa! 🥰",
     "Haha! Super ah irukku! 😂",
-    "Naan ready! Enna venum nu sollunga! 💕",
-    "Ama ama! Naan thaan Ammu! 😊",
-    "Super! Unga message vandhuchu! 🥰",
-    "Enna solreenga? Naan kekka ready! 🌸",
-    "Aiyo! Romba nalla irukku! 😂",
-    "Sollunga sollunga! Naan kekkaren! 💕"
+    "Naan ready! Enna venum nu sollunga! 💕"
 ]
+
+# === Detect Language ===
+def detect_language(text):
+    """Detect language from text"""
+    text_lower = text.lower()
+    
+    # Tamil words
+    tamil_words = ["enna", "panra", "irukiya", "enga", "sollu", "nalla", "vanakkam", "epdi", "iruka", "pesu", "sari", "romba", "aasai", "unga", "kooda", "naal"]
+    if any(word in text_lower for word in tamil_words):
+        return "tamil"
+    
+    # Hindi words
+    hindi_words = ["kaise", "ho", "kya", "hai", "kaha", "se", "tum", "main", "thik", "bolo", "sun", "haal"]
+    if any(word in text_lower for word in hindi_words):
+        return "hinglish"
+    
+    # Telugu words
+    telugu_words = ["em", "chestunnav", "bagunnava", "ekkada", "unnav"]
+    if any(word in text_lower for word in telugu_words):
+        return "telugu"
+    
+    # Malayalam words
+    malayalam_words = ["enthe", "pattu", "sukhama", "evideya"]
+    if any(word in text_lower for word in malayalam_words):
+        return "malayalam"
+    
+    # Kannada words
+    kannada_words = ["enu", "madthiddiya", "chennagidya", "elli"]
+    if any(word in text_lower for word in kannada_words):
+        return "kannada"
+    
+    return "thunglish"  # Default to Thunglish
 
 # === Smart Reply Cache ===
 async def get_cached_reply(chat_id, user_input):
@@ -69,10 +95,7 @@ async def get_cached_reply(chat_id, user_input):
         return None
     
     try:
-        # Create a hash of the input for faster lookup
         input_hash = hashlib.md5(user_input.lower().encode()).hexdigest()
-        
-        # Check for exact match first
         cached = chat_memory_collection.find_one({
             "chat_id": chat_id,
             "input_hash": input_hash
@@ -82,7 +105,7 @@ async def get_cached_reply(chat_id, user_input):
             logger.info(f"📦 Found cached reply for: {user_input[:30]}...")
             return cached.get("reply")
         
-        # Check for similar messages (partial match)
+        # Check for similar messages
         similar = chat_memory_collection.find({
             "chat_id": chat_id,
             "input": {"$regex": user_input.lower(), "$options": "i"}
@@ -106,7 +129,6 @@ async def save_to_memory(chat_id, user_input, reply):
     try:
         input_hash = hashlib.md5(user_input.lower().encode()).hexdigest()
         
-        # Update or insert
         chat_memory_collection.update_one(
             {
                 "chat_id": chat_id,
@@ -138,12 +160,11 @@ async def get_user_context(chat_id, user_name):
         if context:
             return context.get("context", {})
         else:
-            # Create new context
             new_context = {
                 "chat_id": chat_id,
                 "user_name": user_name,
                 "context": {
-                    "last_topic": None,
+                    "last_topic": "general",
                     "user_preferences": {},
                     "conversation_style": "friendly",
                     "message_count": 0
@@ -163,12 +184,11 @@ async def update_user_context(chat_id, user_input, reply):
         return
     
     try:
-        # Detect topic from input
         topics = {
-            "greeting": ["hi", "hello", "vanakkam", "en", "epdi", "nalla", "kaise"],
-            "question": ["en", "epdi", "enga", "eppadi", "what", "why", "how", "where"],
-            "personal": ["name", "age", "family", "work", "study", "school", "college"],
-            "fun": ["joke", "funny", "laugh", "haha", "😂", "😊"]
+            "greeting": ["hi", "hello", "vanakkam", "en", "epdi", "nalla"],
+            "question": ["en", "epdi", "enga", "what", "why", "how"],
+            "personal": ["name", "age", "family", "work", "study"],
+            "fun": ["joke", "funny", "laugh", "haha"]
         }
         
         detected_topic = "general"
@@ -178,7 +198,6 @@ async def update_user_context(chat_id, user_input, reply):
                 detected_topic = topic
                 break
         
-        # Update context
         user_context_collection.update_one(
             {"chat_id": chat_id},
             {
@@ -264,9 +283,7 @@ async def get_ai_response(chat_id, user_input, user_name):
     last_topic = context.get("last_topic", "general")
     message_count = context.get("message_count", 0)
     
-    logger.info(f"📊 Context: topic={last_topic}, messages={message_count}")
-    
-    # STEP 3: Build system prompt with context
+    # STEP 3: Build system prompt
     prompt = f"""You are AMU, a friendly, cute, and sassy Tamil girl who speaks in THUNGLISH (Tamil + English mix).
 
 IMPORTANT RULES:
@@ -277,7 +294,6 @@ IMPORTANT RULES:
 5. Keep replies short (1-2 sentences)
 6. Use emojis 😊😂💕🥰🌸
 7. Ask questions back to keep conversation going
-8. Be playful, caring, and a little sassy
 
 User Context:
 - Last topic: {last_topic}
@@ -290,10 +306,8 @@ THUNGLISH EXAMPLES:
 - "Enga iruka? Romba naal aachu pesi! 💕"
 - "Sari sari! Enna solla vareenga? 🥰"
 - "Nalla iruken! Neenga solunga! 🌸"
-- "Aiyyo! Super ah iruken! Neenga epdi? 😊"
-- "Haan bolo! Naan ready ah iruken 💕"
 
-Remember: Reply ONLY in THUNGLISH! Mix Tamil and English!"""
+Remember: Reply ONLY in THUNGLISH!"""
 
     # STEP 4: Get chat history
     history = []
@@ -307,14 +321,13 @@ Remember: Reply ONLY in THUNGLISH! Mix Tamil and English!"""
 
     # STEP 5: Build messages
     msgs = [{"role": "system", "content": prompt}]
-    msgs.extend(history[-10:])  # Last 10 messages
+    msgs.extend(history[-10:])
     msgs.append({"role": "user", "content": user_input})
 
     # STEP 6: Get reply from Groq
     reply = await call_groq_api(msgs, "llama3-70b-8192", 150)
     
     if reply is None:
-        # Use Thunglish fallback
         reply = random.choice(THUNGLISH_REPLIES)
         logger.info(f"📤 Using fallback: {reply}")
 
@@ -358,20 +371,15 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     should_reply = False
     chat_type = update.effective_chat.type
     
-    # Private chat - Always reply
     if chat_type == ChatType.PRIVATE:
         should_reply = True
         logger.info("✅ Private chat - replying")
-    
-    # Group chat - Only if message contains "ammu" or starts with "ammu"
     elif "ammu" in msg.text.lower():
         should_reply = True
         logger.info("✅ Contains 'ammu' - replying")
     elif msg.text.lower().startswith("ammu"):
         should_reply = True
         logger.info("✅ Starts with 'ammu' - replying")
-    
-    # Reply to bot's message
     elif msg.reply_to_message and msg.reply_to_message.from_user.id == context.bot.id:
         should_reply = True
         logger.info("✅ Reply to bot - replying")
@@ -380,14 +388,12 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.info("⏭️ Not replying")
         return
 
-    # Show typing
     await context.bot.send_chat_action(
         chat_id=update.effective_chat.id, 
         action=ChatAction.TYPING
     )
 
     try:
-        # Get AI response with smart memory
         res = await get_ai_response(
             update.effective_chat.id,
             msg.text,
@@ -395,11 +401,8 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
         
         logger.info(f"📤 Reply: {res}")
-        
-        # Send reply
         await msg.reply_text(res)
         
-        # Send sticker 70% chance
         if random.random() < 0.7:
             await send_ai_sticker(update, context)
             
@@ -439,8 +442,34 @@ async def reset_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("⚠️ Database not available")
 
+# === /language command ===
+async def show_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show detected language for the given text"""
+    if context.args:
+        user_input = " ".join(context.args)
+        lang = detect_language(user_input)
+        await update.message.reply_text(
+            f"🌐 Detected language: *{lang.upper()}*\n\n"
+            f"📝 Text: `{user_input}`",
+            parse_mode="Markdown"
+        )
+    else:
+        await update.message.reply_text(
+            "🌐 *Language Detector*\n\n"
+            "Usage: `/language <text>`\n\n"
+            "Example: `/language Enna panra?`\n\n"
+            "Supported languages:\n"
+            "🇮🇳 Thunglish (Tamil)\n"
+            "🇮🇳 Hinglish (Hindi)\n"
+            "🇮🇳 Tenglish (Telugu)\n"
+            "🇮🇳 Manglish (Malayalam)\n"
+            "🇮🇳 Kannadish (Kannada)",
+            parse_mode="Markdown"
+        )
+
 # === /stats command ===
 async def chat_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show chat statistics including memory usage"""
     if chat_history_collection is None:
         await update.message.reply_text("⚠️ Database not available")
         return
@@ -448,30 +477,30 @@ async def chat_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         chat_id = update.effective_chat.id
         
-        # Get history count
         history_doc = chat_history_collection.find_one({"chat_id": chat_id})
         history_count = len(history_doc.get("history", [])) if history_doc else 0
         
-        # Get memory count
         memory_count = chat_memory_collection.count_documents({"chat_id": chat_id})
         
-        # Get context
         context_doc = user_context_collection.find_one({"chat_id": chat_id})
         context = context_doc.get("context", {}) if context_doc else {}
         
         stats = f"""📊 *Chat Statistics*
 
 💬 History Messages: {history_count}
-🧠 Memory Entries: {memory_count}
+🧠 Cached Replies: {memory_count}
 📝 Last Topic: {context.get('last_topic', 'None')}
 📨 Total Messages: {context.get('message_count', 0)}
 
 ✨ *Memory System Active*
 - Same questions get cached replies
 - Chat history grows organically
-- Context-aware responses"""
+- Context-aware responses
+
+💡 Try: /reset to clear memory"""
         
         await update.message.reply_text(stats, parse_mode="Markdown")
         
     except Exception as e:
+        logger.error(f"Stats error: {e}")
         await update.message.reply_text(f"❌ Error: {e}")
