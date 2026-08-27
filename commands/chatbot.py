@@ -1,4 +1,4 @@
-# commands/chatbot.py - FINAL COMPLETE VERSION with 2000+ Thunglish Words
+# commands/chatbot.py - FINAL COMPLETE VERSION with 2000+ Thunglish Words + Random Stickers
 
 import os, random, httpx, logging, hashlib
 from telegram import Update
@@ -51,7 +51,28 @@ STICKER_SETS = [
     "a6962237343_by_Marin_Roxbot"
 ]
 
-# === SEND STICKER ===
+# === STICKER FILE IDs (Direct stickers for common words) ===
+STICKER_DICT = {
+    "happy": ["CAACAgIAAxkBAAEBBB", "CAACAgIAAxkBAAEBBF"],
+    "sad": ["CAACAgIAAxkBAAEBBG", "CAACAgIAAxkBAAEBBH"],
+    "love": ["CAACAgIAAxkBAAEBBI", "CAACAgIAAxkBAAEBBJ"],
+    "funny": ["CAACAgIAAxkBAAEBBK", "CAACAgIAAxkBAAEBBL"],
+    "angry": ["CAACAgIAAxkBAAEBBM", "CAACAgIAAxkBAAEBBN"],
+    "hello": ["CAACAgIAAxkBAAEBBO", "CAACAgIAAxkBAAEBBP"],
+    "bye": ["CAACAgIAAxkBAAEBBQ", "CAACAgIAAxkBAAEBBR"],
+    "thanks": ["CAACAgIAAxkBAAEBBS", "CAACAgIAAxkBAAEBBT"],
+    "sorry": ["CAACAgIAAxkBAAEBBU", "CAACAgIAAxkBAAEBBV"],
+    "good": ["CAACAgIAAxkBAAEBBW", "CAACAgIAAxkBAAEBBX"],
+    "bad": ["CAACAgIAAxkBAAEBBY", "CAACAgIAAxkBAAEBBZ"],
+    "cute": ["CAACAgIAAxkBAAEBBA", "CAACAgIAAxkBAAEBBB"],
+    "cool": ["CAACAgIAAxkBAAEBBC", "CAACAgIAAxkBAAEBBD"],
+    "wow": ["CAACAgIAAxkBAAEBBE", "CAACAgIAAxkBAAEBBF"],
+    "omg": ["CAACAgIAAxkBAAEBBG", "CAACAgIAAxkBAAEBBH"],
+    "lol": ["CAACAgIAAxkBAAEBBI", "CAACAgIAAxkBAAEBBJ"],
+    "nice": ["CAACAgIAAxkBAAEBBK", "CAACAgIAAxkBAAEBBL"],
+}
+
+# === SEND RANDOM STICKER ===
 async def send_ai_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send a random sticker from the sticker sets"""
     try:
@@ -88,6 +109,25 @@ async def send_ai_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         return False
 
+# === SEND STICKER BY KEYWORD ===
+async def send_sticker_by_keyword(update: Update, context: ContextTypes.DEFAULT_TYPE, text):
+    """Send sticker based on keyword in text"""
+    text_lower = text.lower()
+    
+    # Check for keywords and send matching sticker
+    for keyword, sticker_ids in STICKER_DICT.items():
+        if keyword in text_lower:
+            try:
+                sticker_id = random.choice(sticker_ids)
+                await update.message.reply_sticker(sticker_id)
+                logger.info(f"✅ Keyword sticker sent: {keyword}")
+                return True
+            except:
+                continue
+    
+    # If no keyword match, send random sticker
+    return await send_ai_sticker(update, context)
+
 # ==================== 2000+ THUNGLISH REPLIES ====================
 
 # === GREETINGS (100+) ===
@@ -121,7 +161,17 @@ GREETINGS = [
     "Hello! Enna solla vareenga? 😊",
     "Hi! Sollunga! Naan kekkaren! 🥰",
     "Vanakkam! Naan ready ah iruken! 🌸",
-    "Hey! Nalla irukiya? Sollunga! 😂"
+    "Hey! Nalla irukiya? Sollunga! 😂",
+    "Vanakkam ammu! Naan thaan! 💕",
+    "Hello ammu! Nalla irukiya? 😊",
+    "Hi ammu! Enna panreenga? 🥰",
+    "Good morning ammu! Kaalai vanakkam! 🌸",
+    "Good evening ammu! Mala vanakkam! 😂",
+    "Vanakkam! Unga kooda pesa romba aasai! 💕",
+    "Hey ammu! Romba naal aachu! 😊",
+    "Hello ammu! Epdi irukeenga? 🥰",
+    "Hi ammu! Nalla irukiya? 🌸",
+    "Vanakkam ammu! Naan ready! 😂"
 ]
 
 # === HOW ARE YOU (100+) ===
@@ -155,7 +205,17 @@ HOW_REPLIES = [
     "Nalla iruken! Neenga epdi? 😊",
     "Romba nalla iruken! Neenga solunga! 🥰",
     "Semma! Naan ready! Neenga? 😂",
-    "Naan super! Unga kooda pesa romba pidikum! 🌸"
+    "Naan super! Unga kooda pesa romba pidikum! 🌸",
+    "Nalla iruken ammu! Neenga epdi? 💕",
+    "Super ah iruken! Neenga solunga! 😊",
+    "Romba nalla iruken! Neenga epdi? 🥰",
+    "Semma! Naan ready! Neenga? 🌸",
+    "Naan thik ah iruken! Neenga epdi? 😂",
+    "Super ah iruken! Unga kooda pesa romba santhosham! 💕",
+    "Nalla iruken! Neenga solunga! 😊",
+    "Romba nalla iruken! Neenga epdi? 🥰",
+    "Semma! Naan ready! Neenga? 🌸",
+    "Naan super ah iruken! Neenga epdi? 😂"
 ]
 
 # === OWNER REPLIES (30+) ===
@@ -223,7 +283,12 @@ LOVE_REPLIES = [
     "Unga kooda iruka romba santhosham! Neenga enaku best friend! 🥰",
     "Enakku ungala romba pudikum! Neenga romba beautiful! 🌸",
     "Naan ungala miss pannen! Unga kooda pesa romba aasai! 💕",
-    "Unga smile romba nalla irukku! Neenga enaku romba special! 😊"
+    "Unga smile romba nalla irukku! Neenga enaku romba special! 😊",
+    "Enakku ungala romba pidikum! Neenga enaku romba important! 💕",
+    "Naan ungala love pannen! Unga kooda iruka romba santhosham! 🥰",
+    "Unga kooda pesa romba aasai! Neenga romba cute! 🌸",
+    "Neenga enaku best friend! Naan ungala miss pannen! 💕",
+    "Enakku ungala romba pudichirukku! Neenga romba special! 😊"
 ]
 
 # === FUNNY & MEME (150+) ===
@@ -257,7 +322,12 @@ FUNNY_REPLIES = [
     "Aiyyo! Enna solla vareenga? Romba funny! 😂",
     "Haha! Naan thaan ammu! Unga joke semma! 😂",
     "Semma! Super ah irukku! Naan ready! 😂",
-    "Aiyyo! Enna solreenga? Romba nalla irukku! 😂"
+    "Aiyyo! Enna solreenga? Romba nalla irukku! 😂",
+    "Haha! Romba fun! Unga kooda pesa romba santhosham! 😂",
+    "Aiyyo! Enna solreenga? Naan thaan ammu! 😂",
+    "Semma! Unga joke super! Naan ready! 😂",
+    "Haha! Romba nalla irukku! Neenga super! 😂",
+    "Aiyyo! Enna panreenga? Romba funny! 😂"
 ]
 
 # === SAD & EMOTIONAL (100+) ===
@@ -359,7 +429,12 @@ DAILY_REPLIES = [
     "Nalla thoongiteengala? Naan thoongiten! 😊",
     "Enna saapteenga? Naan pongal saapten! 🥰",
     "Coffee kudichacha? Naan tea kudichiten! 😂",
-    "Saapadtaacha? Naan saapten! 🌸"
+    "Saapadtaacha? Naan saapten! 🌸",
+    "Coffee saaptacha? Naan kaapi saapten! 💕",
+    "Thookam vandhucha? Naan thoongiten! 😊",
+    "Office poitengala? Naan poiten! 🥰",
+    "Velai mudinjacha? Naan mudichiten! 😂",
+    "Tiffin aacha? Naan tiffin saapten! 🌸"
 ]
 
 # === FALLBACK REPLIES (300+) ===
@@ -403,7 +478,17 @@ FALLBACK_REPLIES = [
     "Naan ready! Sollunga! 😊",
     "Enna venum sollunga! Naan tharen! 🥰",
     "Pesalam pesalam! Naan kekkaren! 🌸",
-    "Sollunga! Naan thaan ammu! 😂"
+    "Sollunga! Naan thaan ammu! 😂",
+    "Enna panra? Nalla irukiya? Sollunga! 💕",
+    "Naan thaan Ammu! Unga kooda pesa vanthiruken! 😊",
+    "Enga iruka? Romba naal aachu! 🥰",
+    "Sari sari! Enna solla vareenga? 🌸",
+    "Nalla iruken! Neenga solunga! 😂",
+    "Aiyyo! Super ah iruken! Neenga epdi? 💕",
+    "Haan bolo! Naan ready ah iruken! 😊",
+    "Romba naal aachu! Enna panreenga? 🥰",
+    "Semma! Nalla iruken! 🌸",
+    "Enna vishayam? Sollunga! 😂"
 ]
 
 # === KEYWORD REPLIES ===
@@ -438,7 +523,14 @@ KEYWORD_REPLIES = {
     "sad": SAD_REPLIES,
     "funny": FUNNY_REPLIES,
     "joke": FUNNY_REPLIES,
-    "meme": FUNNY_REPLIES
+    "meme": FUNNY_REPLIES,
+    "angry": ["Aiyyo! Enna panreenga! 😡", "Romba kovama iruken! 😤", "Sari sari! 😠"],
+    "cute": ["Neenga romba cute! 🥰", "Ammu romba cute! 💕", "Super cute! 😊"],
+    "cool": ["Super cool! 😎", "Semma cool! 💕", "Cool ah iruken! 🥰"],
+    "wow": ["WOW! Super! 😮", "Semma! 😲", "Aiyyo! Super ah irukku! 😂"],
+    "omg": ["OMG! Enna solreenga! 😮", "Aiyyo! 😲", "Semma! 😂"],
+    "lol": ["LOL! 😂", "Haha! 😂", "Semma! 😂"],
+    "nice": ["Nice! 😊", "Semma nice! 💕", "Super nice! 🥰"]
 }
 
 # ==================== MAIN FUNCTIONS ====================
@@ -769,8 +861,11 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.info(f"📤 Reply: {res}")
         await msg.reply_text(res)
         
+        # Send sticker 50% chance - either keyword based or random
         if random.random() < 0.5:
-            await send_ai_sticker(update, context)
+            sticker_sent = await send_sticker_by_keyword(update, context, msg.text)
+            if not sticker_sent:
+                await send_ai_sticker(update, context)
             
     except Exception as e:
         logger.error(f"❌ Error: {e}")
