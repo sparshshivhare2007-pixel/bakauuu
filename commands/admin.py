@@ -5,7 +5,7 @@ from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 from database.db import get_user, users_col
 
-OWNER_ID = 6264089241
+OWNER_ID = 8172258194
 
 # ===== SUDO SYSTEM (runtime) =====
 SUDO_USERS = set()
