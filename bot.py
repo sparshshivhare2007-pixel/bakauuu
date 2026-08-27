@@ -34,7 +34,7 @@ from commands.game import register_game_commands
 from commands.admin import register_admin_commands
 from commands.logger import register_logger
 from commands.broadcast import register_broadcast
-from commands.chatbot import ask_ai, ai_message_handler
+from commands.chatbot import ask_ai, ai_message_handler, reset_chat, show_language
 from commands.couple import couple
 from commands.shop import items, item, gift
 from commands.quote import q
@@ -78,7 +78,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     keyboard = [
         [
-            InlineKeyboardButton("💬 Talk to Baka", callback_data="talk_baka"),
+            InlineKeyboardButton("💬 Talk to Ammu", callback_data="talk_ammu"),
             InlineKeyboardButton("✨ SPARSH", url="https://t.me/oye_sparsh")
         ],
         [
@@ -90,7 +90,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_photo(
         photo=START_IMAGE_URL,
-        caption=f"✨ Hey *{user.first_name}*\n💌 I'm *Baka Bot*",
+        caption=f"✨ Hey *{user.first_name}*\n💌 I'm *Ammu Bot* - Your virtual friend!",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
@@ -99,23 +99,39 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    if query.data == "talk_baka":
-        await query.message.reply_text("Haan bolo 😊")
+    if query.data == "talk_ammu":
+        await query.message.reply_text("Haan bolo! Main sun rahi hu 💕")
 
-# ================== SAFE AI HANDLER ==================
+# ================== AI HANDLER - GROQ + MULTI-LANGUAGE ==================
 async def safe_ai_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    ❗ FIX:
-    - AI sirf private chat me
-    - commands ignore
-    - typing loop nahi hoga
+    AI Handler with Groq + Multi-language support
+    - Private chat: Always reply
+    - Group chat: Only if message contains 'ammu'
+    - No typing loop
+    - Supports Thunglish, Hinglish, Tenglish, Manglish, Kannadish
     """
-    if update.effective_chat.type != "private":
-        return
-
     if not update.message or not update.message.text:
         return
 
+    # Check if should reply
+    should_reply = False
+    chat_type = update.effective_chat.type
+    
+    # Private chat - always reply
+    if chat_type == "private":
+        should_reply = True
+    # Group chat - only if contains "ammu"
+    elif "ammu" in update.message.text.lower():
+        should_reply = True
+    # Reply to bot's message
+    elif update.message.reply_to_message and update.message.reply_to_message.from_user.id == context.bot.id:
+        should_reply = True
+
+    if not should_reply:
+        return
+
+    # Call the AI handler from chatbot.py
     await ai_message_handler(update, context)
 
 # ================== ERROR ==================
@@ -187,8 +203,12 @@ def main():
     register_admin_commands(app)
     register_radhe(app)
 
-    # ---------- AI ----------
+    # ---------- AI COMMANDS (GROQ + MULTI-LANGUAGE) ----------
     app.add_handler(CommandHandler("ask", ask_ai))
+    app.add_handler(CommandHandler("reset", reset_chat))  # Clear chat history
+    app.add_handler(CommandHandler("language", show_language))  # Detect language
+    
+    # ---------- AI MESSAGE HANDLER ----------
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, safe_ai_handler)
     )
@@ -196,7 +216,9 @@ def main():
     # ---------- ERROR ----------
     app.add_error_handler(error_handler)
 
-    print("✅ Baka Bot Online")
+    print("✅ Ammu Bot Online with Groq + Multi-language support!")
+    print("🌐 Languages: Thunglish, Hinglish, Tenglish, Manglish, Kannadish")
+    print("💬 Trigger: 'ammu' in groups | Always reply in private")
     app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
