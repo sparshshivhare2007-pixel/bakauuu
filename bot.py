@@ -56,7 +56,7 @@ from commands.fun import (
 )
 
 # ================== START IMAGE ==================
-START_IMAGE_URL = "https://files.catbox.moe/yzpfuh.jpg"
+START_IMAGE_URL = "https://files.catbox.moe/49sy7j.jpg"
 
 # ================== AUTO REGISTER ==================
 async def auto_register_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -85,7 +85,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [
             InlineKeyboardButton("💬 Talk to Ammu", callback_data="talk_ammu"),
-            InlineKeyboardButton("✨ SPARSH", url="https://t.me/oye_sparsh")
+            InlineKeyboardButton("✨ kalvan", url="https://t.me/MR_KALVAN")
         ],
         [
             InlineKeyboardButton("➕ Add to Group",
@@ -96,7 +96,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_photo(
         photo=START_IMAGE_URL,
-        caption=f"✨ Hey *{user.first_name}*\n💌 I'm *Ammu Bot* - Your virtual friend!",
+        caption=f"✨ Hey *{user.first_name}*\n💌 I'm *𝗜'𝗠 🎼 𝝠 𝗠 𝗠 𝗨* - Your virtual friend!",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
@@ -106,7 +106,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     if query.data == "talk_ammu":
-        await query.message.reply_text("Haan bolo! Main sun rahi hu 💕")
+        await query.message.reply_text("Haan ennu parada 💕")
 
 # ================== AI HANDLER - GROQ + THUNGLISH + SMART MEMORY ==================
 async def safe_ai_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
