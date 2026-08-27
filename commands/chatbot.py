@@ -1,4 +1,4 @@
-# commands/chatbot.py - Complete Final Code with 2000+ Thunglish Replies + Stickers
+# commands/chatbot.py - Complete with Working Stickers
 
 import os, random, httpx, logging, hashlib
 from telegram import Update
@@ -37,28 +37,77 @@ except Exception as e:
     chat_memory_collection = None
     user_context_collection = None
 
-# ==================== STICKER PACKS ====================
-STICKER_PACKS = [
-    "https://t.me/addstickers/RandomByDarkzenitsu",
-    "https://t.me/addstickers/Null_x_sticker_2",
-    "https://t.me/addstickers/pack_73bc9_by_TgEmojis_bot",
-    "https://t.me/addstickers/animation_0_8_Cat",
-    "https://t.me/addstickers/vhelw_by_CalsiBot",
-    "https://t.me/addstickers/Rohan_yad4v1745993687601_by_toWebmBot",
-    "https://t.me/addstickers/MySet199",
-    "https://t.me/addstickers/Quby741",
-    "https://t.me/addstickers/Animalsasthegtjtky_by_fStikBot",
-    "https://t.me/addstickers/a6962237343_by_Marin_Roxbot",
-    "https://t.me/addstickers/cybercats_stickers",
-    "https://t.me/addstickers/TamilStickers",
-    "https://t.me/addstickers/Thalaivar",
-    "https://t.me/addstickers/VijayStickers",
-    "https://t.me/addstickers/AnimeTamil"
+# ==================== STICKER SET NAMES (ONLY NAMES) ====================
+STICKER_SETS = [
+    "RandomByDarkzenitsu",
+    "Null_x_sticker_2",
+    "pack_73bc9_by_TgEmojis_bot",
+    "animation_0_8_Cat",
+    "vhelw_by_CalsiBot",
+    "MySet199",
+    "Quby741",
+    "cybercats_stickers",
+    "Rohan_yad4v1745993687601_by_toWebmBot",
+    "a6962237343_by_Marin_Roxbot"
 ]
+
+# === SEND STICKER (FIXED - USING NAMES NOT URLs) ===
+async def send_ai_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Send a random sticker from the sticker sets"""
+    try:
+        logger.info("=" * 50)
+        logger.info("🎨 STICKER FUNCTION STARTED")
+        logger.info(f"📱 Chat ID: {update.effective_chat.id}")
+        
+        # Randomly select a sticker set name
+        sticker_set_name = random.choice(STICKER_SETS)
+        logger.info(f"🔄 Trying sticker set: {sticker_set_name}")
+        
+        # Get the sticker set using NAME only
+        sticker_set = await context.bot.get_sticker_set(sticker_set_name)
+        
+        if sticker_set and sticker_set.stickers:
+            # Pick a random sticker from the set
+            sticker = random.choice(sticker_set.stickers)
+            logger.info(f"✅ Selected sticker: {sticker.file_id[:30]}...")
+            logger.info(f"📝 Sticker emoji: {sticker.emoji}")
+            
+            # Send the sticker
+            await update.message.reply_sticker(sticker.file_id)
+            logger.info("✅ STICKER SENT SUCCESSFULLY!")
+            logger.info("=" * 50)
+            return True
+        else:
+            logger.warning(f"⚠️ No stickers in set: {sticker_set_name}")
+            logger.info("=" * 50)
+            return False
+            
+    except Exception as e:
+        logger.error(f"❌ Sticker error: {str(e)}")
+        
+        # Try fallback sticker sets
+        fallback_sets = ["RandomByDarkzenitsu", "Null_x_sticker_2"]
+        for fallback in fallback_sets:
+            try:
+                logger.info(f"🔄 Trying fallback: {fallback}")
+                sticker_set = await context.bot.get_sticker_set(fallback)
+                if sticker_set and sticker_set.stickers:
+                    sticker = random.choice(sticker_set.stickers)
+                    await update.message.reply_sticker(sticker.file_id)
+                    logger.info(f"✅ Fallback sticker sent: {fallback}")
+                    logger.info("=" * 50)
+                    return True
+            except Exception as fb_error:
+                logger.error(f"❌ Fallback failed: {fb_error}")
+                continue
+        
+        logger.error("❌ ALL STICKER ATTEMPTS FAILED!")
+        logger.info("=" * 50)
+        return False
 
 # ==================== 2000+ THUNGLISH REPLIES ====================
 
-# === GREETINGS (50+) ===
+# === GREETINGS ===
 GREETINGS = [
     "Vanakkam! Epdi irukeenga? 😊",
     "Hello! Nalla irukiya? 💕",
@@ -82,7 +131,7 @@ GREETINGS = [
     "Vanakkam! Epdi irukeenga? Naan super! 💕"
 ]
 
-# === HOW ARE YOU (50+) ===
+# === HOW ARE YOU ===
 HOW_REPLIES = [
     "Naan super ah iruken! Neenga epdi? 😊",
     "Semma! Nalla iruken! Neenga? 💕",
@@ -106,26 +155,26 @@ HOW_REPLIES = [
     "Naan ready! Neenga epdi irukeenga? 🌸"
 ]
 
-# === OWNER REPLY (15+) ===
+# === OWNER REPLY ===
 OWNER_REPLIES = [
     "Enna owner? Naan thaan ammu! 😂",
-    "Naan thaan owner! Kalyan en friend! 💕",
-    "Kalyan thaan en owner! Avan romba nalla payan! 😊",
-    "Owner? Kalyan! Avan thaan en creator! 🥰",
-    "Kalyan! Avan romba cute! En owner! 🌸",
-    "En owner Kalyan! Avan romba special! 💕",
-    "Kalyan thaan en boss! Avan romba nallavar! 😂",
-    "Owner Kalyan! Avan enaku romba pidikum! 😊",
-    "Kalyan! Avan thaan en owner! Avan romba smart! 🥰",
-    "En owner Kalyan! Avan romba nalla iruppan! 🌸",
-    "Kalyan! Avan thaan en creator! Avan romba kind! 💕",
-    "Owner Kalyan! Avan enaku romba important! 😊",
-    "Kalyan! Avan thaan en owner! Avan romba funny! 🥰",
-    "En owner Kalyan! Avan romba caring! 🌸",
-    "Kalyan! Avan thaan en owner! Avan romba special! 💕"
+    "Naan thaan owner! KALVAN en friend! 💕",
+    "KALVAN thaan en owner! Avan romba nalla payan! 😊",
+    "Owner? KALVAN! Avan thaan en creator! 🥰",
+    "KALVAN! Avan romba cute! En owner! 🌸",
+    "En owner KALVAN! Avan romba special! 💕",
+    "KALVAN thaan en boss! Avan romba nallavar! 😂",
+    "Owner KALVAN! Avan enaku romba pidikum! 😊",
+    "KALVAN! Avan thaan en owner! Avan romba smart! 🥰",
+    "En owner KALVAN! Avan romba nalla iruppan! 🌸",
+    "KALVAN! Avan thaan en creator! Avan romba kind! 💕",
+    "Owner KALVAN! Avan enaku romba important! 😊",
+    "KALVAN! Avan thaan en owner! Avan romba funny! 🥰",
+    "En owner KALVAN! Avan romba caring! 🌸",
+    "KALVAN! Avan thaan en owner! Avan romba special! 💕"
 ]
 
-# === LOVE & ROMANCE (50+) ===
+# === LOVE REPLIES ===
 LOVE_REPLIES = [
     "Enakku ungala romba pidikum! 💕",
     "Naan ungala love pannen! 😊",
@@ -149,7 +198,7 @@ LOVE_REPLIES = [
     "Naan ungala romba miss pannen! 🌸"
 ]
 
-# === FUNNY & MEME (50+) ===
+# === FUNNY REPLIES ===
 FUNNY_REPLIES = [
     "Haha! Romba fun ah irukku! 😂",
     "Aiyyo! Enna solreenga! 😂",
@@ -173,7 +222,7 @@ FUNNY_REPLIES = [
     "Haha! Naan thaan ready! 😂"
 ]
 
-# === SAD & EMOTIONAL (30+) ===
+# === SAD REPLIES ===
 SAD_REPLIES = [
     "Aiyyo! Enakku romba kastama irukku! 😢",
     "Naan romba sad ah iruken! 😢",
@@ -197,7 +246,7 @@ SAD_REPLIES = [
     "Naan romba miss pannen! 😢"
 ]
 
-# === SASSY & INSULTS (30+) ===
+# === SASSY REPLIES ===
 SASSY_REPLIES = [
     "Aiyyo! Enna solreenga! 😂",
     "Naan thaan ammu! Unga kitta pesa vanthiruken! 😂",
@@ -221,7 +270,7 @@ SASSY_REPLIES = [
     "Enna solreenga? Naan kekkaren! 😂"
 ]
 
-# === DAILY CONVERSATIONS (50+) ===
+# === DAILY REPLIES ===
 DAILY_REPLIES = [
     "Saapadtaacha? Naan saapten! 😊",
     "Coffee kudichacha? Naan kudichiten! 💕",
@@ -245,9 +294,8 @@ DAILY_REPLIES = [
     "Saapadtaacha? Naan saapten! 🌸"
 ]
 
-# === FALLBACK REPLIES (200+) ===
+# === FALLBACK REPLIES ===
 FALLBACK_REPLIES = [
-    # General (50)
     "Enna panra? Nalla irukiya? 😊",
     "Naan thaan Ammu! Unga kooda pesanum nu romba aasai 😂",
     "Enga iruka? Romba naal aachu pesi! 💕",
@@ -267,72 +315,7 @@ FALLBACK_REPLIES = [
     "Super! Unga message vandhuchu! 🥰",
     "Enna solreenga? Naan kekka ready! 🌸",
     "Aiyo! Romba nalla irukku! 😂",
-    "Sollunga sollunga! Naan kekkaren! 💕",
-    # Tamil specific (30)
-    "Enna panreenga? Naan super! 😊",
-    "Naan thaan ammu! Unga kooda pesa vanthiruken! 💕",
-    "Epdi irukeenga? Naan romba nalla iruken! 🥰",
-    "Enna solla vareenga? Naan kekkaren! 🌸",
-    "Nalla irukiya? Naan super! 😂",
-    "Enga irukeenga? Naan inga iruken! 💕",
-    "Enna vishayam? Sollunga! 😊",
-    "Sari sari! Naan ready! 🥰",
-    "Aiyyo! Super ah irukku! 🌸",
-    "Semma! Naan thaan! 😂",
-    # Friendly (30)
-    "Hi! Nalla irukiya? 😊",
-    "Hello! Epdi irukeenga? 💕",
-    "Vanakkam! Enna panreenga? 🥰",
-    "Hey! Romba naal aachu! 🌸",
-    "Good morning! Kaalai vanakkam! 😂",
-    "Good evening! Mala vanakkam! 💕",
-    "Good night! Iniya iravu! 😊",
-    "Vanakkam ammu! Naan ready! 🥰",
-    "Hello ji! Epdi irukeenga? 🌸",
-    "Hi ammu! Enna vishayam? 😂",
-    # Funny (20)
-    "Haha! Romba fun ah irukku! 😂",
-    "Aiyyo! Enna solreenga! 😂",
-    "Semma! Super ah irukku! 😂",
-    "Haha! Naan ready! 😂",
-    "Aiyyo! Romba nalla irukku! 😂",
-    "Haha! Unga joke super! 😂",
-    "Semma! Adhu super! 😂",
-    "Haha! Naan thaan ammu! 😂",
-    "Aiyyo! Enna panreenga! 😂",
-    "Haha! Romba funny! 😂",
-    # Emotional (20)
-    "Enakku romba santhosham! 😊",
-    "Romba happy ah iruken! 💕",
-    "Enakku romba feel aagudhu! 🥰",
-    "Naan romba miss pannen! 🌸",
-    "Enakku romba kastama irukku! 😂",
-    "Naan romba tired ah iruken! 💕",
-    "Enakku romba valikudhu! 😊",
-    "Naan romba sad ah iruken! 🥰",
-    "Enakku romba lonely ah iruken! 🌸",
-    "Naan romba alone ah iruken! 😂",
-    # Random (40)
-    "Enna panra? Sollunga! 😊",
-    "Naan kekkaren! Sollunga! 💕",
-    "Ready ah iruken! Sollunga! 🥰",
-    "Vanga! Pesalam! 🌸",
-    "Sollunga! Naan kekkaren! 😂",
-    "Enna venum? Sollunga! 💕",
-    "Naan thaan! Sollunga! 😊",
-    "Pesalam! Sollunga! 🥰",
-    "Ready! Sollunga! 🌸",
-    "Kekkaren! Sollunga! 😂",
-    "Ammu! Sollunga! 💕",
-    "Naan kekkaren! Sollunga! 😊",
-    "Enna solla vareenga? 🥰",
-    "Sollunga sollunga! 🌸",
-    "Naan ready! Sollunga! 😂",
-    "Pesalam pesalam! 💕",
-    "Enna panra? Sollunga! 😊",
-    "Naan thaan! Kekkaren! 🥰",
-    "Sari! Sollunga! 🌸",
-    "Ammu! Enna venum? 😂"
+    "Sollunga sollunga! Naan kekkaren! 💕"
 ]
 
 # === KEYWORD REPLIES ===
@@ -347,13 +330,8 @@ KEYWORD_REPLIES = {
     "sorry": ["Paravalla! Sari thaan! 😊", "No problem! Naan forgive panniten! 💕", "Sari! Kalakkunga! 🥰"],
     "thank": ["Welcome! 😊", "Nandri! 💕", "Enaku romba santhosham! 🥰"],
     "bye": ["Bye! Varren! 😊", "Sollunga! 💕", "Bye! Miss pannen! 🥰", "Sari! Pogaren! 🌸"],
-    "happy": ["Romba santhosham! 😊", "Happy ah iruken! 💕", "Semma! 🥰"],
-    "sad": SAD_REPLIES,
-    "funny": FUNNY_REPLIES,
-    "joke": FUNNY_REPLIES,
-    "meme": FUNNY_REPLIES,
     "owner": OWNER_REPLIES,
-    "kalyan": OWNER_REPLIES,
+    "KALVAN": OWNER_REPLIES,
     "who": OWNER_REPLIES,
     "name": ["En name Ammu! 😊", "Naan Ammu! Unga friend! 💕", "Ammu thaan en name! 🥰"],
     "age": ["Naan 18! 😊", "En vayasu 19! 💕", "Naan cute age la iruken! 🥰"],
@@ -429,7 +407,7 @@ def get_thunglish_reply(text, user_name=None):
         return random.choice(HOW_REPLIES)
     
     # Owner
-    if "owner" in text_lower or "kalyan" in text_lower:
+    if "owner" in text_lower or "KALVAN" in text_lower:
         return random.choice(OWNER_REPLIES)
     
     # Love
@@ -450,38 +428,6 @@ def get_thunglish_reply(text, user_name=None):
     
     # Fallback
     return random.choice(FALLBACK_REPLIES)
-
-# === Send random sticker ===
-async def send_ai_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Send a random sticker from the sticker packs"""
-    try:
-        # Pick a random sticker pack
-        pack_url = random.choice(STICKER_PACKS)
-        logger.info(f"🎨 Trying sticker pack: {pack_url}")
-        
-        # Get the sticker set
-        sticker_set = await context.bot.get_sticker_set(pack_url)
-        
-        if sticker_set and sticker_set.stickers:
-            # Pick a random sticker from the set
-            sticker = random.choice(sticker_set.stickers)
-            await update.message.reply_sticker(sticker.file_id)
-            logger.info(f"✅ Sticker sent successfully!")
-        else:
-            logger.warning("⚠️ No stickers found in pack")
-            
-    except Exception as e:
-        logger.error(f"❌ Sticker error: {e}")
-        # Try fallback sticker pack
-        try:
-            fallback_pack = "https://t.me/addstickers/RandomByDarkzenitsu"
-            sticker_set = await context.bot.get_sticker_set(fallback_pack)
-            if sticker_set and sticker_set.stickers:
-                sticker = random.choice(sticker_set.stickers)
-                await update.message.reply_sticker(sticker.file_id)
-                logger.info("✅ Fallback sticker sent!")
-        except:
-            logger.error("❌ Fallback sticker also failed")
 
 # === Smart Reply Cache ===
 async def get_cached_reply(chat_id, user_input):
@@ -595,37 +541,42 @@ async def update_user_context(chat_id, user_input, reply):
     except Exception as e:
         logger.error(f"Context update error: {e}")
 
-# === Call Groq API ===
-async def call_groq_api(messages, model="llama3-70b-8192", max_tokens=150):
+# === Call Groq API (FIXED) ===
+async def call_groq_api(messages, model="llama3-70b-8192", max_tokens=100):
+    """Call Groq API with proper error handling"""
     if not GROQ_API_KEY:
-        logger.error("❌ GROQ_API_KEY not found!")
+        logger.warning("⚠️ GROQ_API_KEY not found!")
         return None
     
     url = "https://api.groq.com/openai/v1/chat/completions"
     
-    async with httpx.AsyncClient(timeout=30) as client:
-        try:
-            resp = await client.post(
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(
                 url,
                 json={
                     "model": model,
                     "messages": messages,
                     "max_tokens": max_tokens,
-                    "temperature": 0.9
+                    "temperature": 0.7
                 },
                 headers={
                     "Authorization": f"Bearer {GROQ_API_KEY}",
                     "Content-Type": "application/json"
                 }
             )
-            if resp.status_code == 200:
-                return resp.json()["choices"][0]["message"]["content"]
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data["choices"][0]["message"]["content"]
             else:
-                logger.error(f"❌ Groq API Error: {resp.status_code}")
+                logger.error(f"❌ Groq API Error: {response.status_code}")
+                logger.error(f"📝 Response: {response.text[:200]}")
                 return None
-        except Exception as e:
-            logger.error(f"❌ Groq API Exception: {e}")
-            return None
+                
+    except Exception as e:
+        logger.error(f"❌ Groq API Exception: {e}")
+        return None
 
 # === Generate AI response with Smart Memory ===
 async def get_ai_response(chat_id, user_input, user_name):
@@ -665,13 +616,6 @@ User Context:
 - Total messages: {message_count}
 - User name: {user_name}
 
-THUNGLISH EXAMPLES:
-- "Enna panra? Nalla irukiya? 😊"
-- "Naan thaan Ammu! Unga kooda pesanum nu romba aasai 😂"
-- "Enga iruka? Romba naal aachu pesi! 💕"
-- "Sari sari! Enna solla vareenga? 🥰"
-- "Nalla iruken! Neenga solunga! 🌸"
-
 Remember: Reply ONLY in THUNGLISH!"""
 
         # Get chat history
@@ -689,7 +633,7 @@ Remember: Reply ONLY in THUNGLISH!"""
         msgs.append({"role": "user", "content": user_input})
 
         # Get reply from Groq
-        reply = await call_groq_api(msgs, "llama3-70b-8192", 150)
+        reply = await call_groq_api(msgs, "llama3-70b-8192", 100)
     
     # STEP 4: Use local reply if Groq fails
     if reply is None:
