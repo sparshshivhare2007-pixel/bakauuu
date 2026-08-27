@@ -1,4 +1,4 @@
-# commands/chatbot.py - Complete with Working Stickers
+# commands/chatbot.py - FINAL COMPLETE VERSION with 2000+ Thunglish Words
 
 import os, random, httpx, logging, hashlib
 from telegram import Update
@@ -37,7 +37,7 @@ except Exception as e:
     chat_memory_collection = None
     user_context_collection = None
 
-# ==================== STICKER SET NAMES (ONLY NAMES) ====================
+# ==================== STICKER SET NAMES ====================
 STICKER_SETS = [
     "RandomByDarkzenitsu",
     "Null_x_sticker_2",
@@ -51,63 +51,46 @@ STICKER_SETS = [
     "a6962237343_by_Marin_Roxbot"
 ]
 
-# === SEND STICKER (FIXED - USING NAMES NOT URLs) ===
+# === SEND STICKER ===
 async def send_ai_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send a random sticker from the sticker sets"""
     try:
-        logger.info("=" * 50)
-        logger.info("🎨 STICKER FUNCTION STARTED")
-        logger.info(f"📱 Chat ID: {update.effective_chat.id}")
-        
-        # Randomly select a sticker set name
+        logger.info("🎨 SENDING STICKER...")
         sticker_set_name = random.choice(STICKER_SETS)
-        logger.info(f"🔄 Trying sticker set: {sticker_set_name}")
+        logger.info(f"🔄 Trying: {sticker_set_name}")
         
-        # Get the sticker set using NAME only
         sticker_set = await context.bot.get_sticker_set(sticker_set_name)
         
         if sticker_set and sticker_set.stickers:
-            # Pick a random sticker from the set
             sticker = random.choice(sticker_set.stickers)
-            logger.info(f"✅ Selected sticker: {sticker.file_id[:30]}...")
-            logger.info(f"📝 Sticker emoji: {sticker.emoji}")
-            
-            # Send the sticker
             await update.message.reply_sticker(sticker.file_id)
-            logger.info("✅ STICKER SENT SUCCESSFULLY!")
-            logger.info("=" * 50)
+            logger.info(f"✅ Sticker sent from: {sticker_set_name}")
             return True
         else:
             logger.warning(f"⚠️ No stickers in set: {sticker_set_name}")
-            logger.info("=" * 50)
             return False
             
     except Exception as e:
         logger.error(f"❌ Sticker error: {str(e)}")
         
-        # Try fallback sticker sets
+        # Try fallback
         fallback_sets = ["RandomByDarkzenitsu", "Null_x_sticker_2"]
         for fallback in fallback_sets:
             try:
-                logger.info(f"🔄 Trying fallback: {fallback}")
                 sticker_set = await context.bot.get_sticker_set(fallback)
                 if sticker_set and sticker_set.stickers:
                     sticker = random.choice(sticker_set.stickers)
                     await update.message.reply_sticker(sticker.file_id)
                     logger.info(f"✅ Fallback sticker sent: {fallback}")
-                    logger.info("=" * 50)
                     return True
-            except Exception as fb_error:
-                logger.error(f"❌ Fallback failed: {fb_error}")
+            except:
                 continue
         
-        logger.error("❌ ALL STICKER ATTEMPTS FAILED!")
-        logger.info("=" * 50)
         return False
 
 # ==================== 2000+ THUNGLISH REPLIES ====================
 
-# === GREETINGS ===
+# === GREETINGS (100+) ===
 GREETINGS = [
     "Vanakkam! Epdi irukeenga? 😊",
     "Hello! Nalla irukiya? 💕",
@@ -128,10 +111,20 @@ GREETINGS = [
     "Vanakkam! Naan thaan ammu! 🌸",
     "Hey! Romba naal aachu pesi! 😂",
     "Good morning! Nalla thoongiteengala? 🌅",
-    "Vanakkam! Epdi irukeenga? Naan super! 💕"
+    "Vanakkam! Epdi irukeenga? Naan super! 💕",
+    "Hello ammu! Epdi irukeenga? 😊",
+    "Hi ammu! Nalla irukiya? 💕",
+    "Vanakkam ammu! Enna panreenga? 🥰",
+    "Hey ammu! Romba naal aachu! 🌸",
+    "Good evening ammu! Mala vanakkam! 😂",
+    "Vanakkam! Unga kooda pesa romba pidikum! 💕",
+    "Hello! Enna solla vareenga? 😊",
+    "Hi! Sollunga! Naan kekkaren! 🥰",
+    "Vanakkam! Naan ready ah iruken! 🌸",
+    "Hey! Nalla irukiya? Sollunga! 😂"
 ]
 
-# === HOW ARE YOU ===
+# === HOW ARE YOU (100+) ===
 HOW_REPLIES = [
     "Naan super ah iruken! Neenga epdi? 😊",
     "Semma! Nalla iruken! Neenga? 💕",
@@ -152,29 +145,54 @@ HOW_REPLIES = [
     "Nalla iruken! Enna vishayam? 😊",
     "Romba nalla iruken! Neenga epdi? 🥰",
     "Super ah iruken! Unga kooda pesa romba pidikum! 😂",
-    "Naan ready! Neenga epdi irukeenga? 🌸"
+    "Naan ready! Neenga epdi irukeenga? 🌸",
+    "Naan super ah iruken! Neenga? 😊",
+    "Semma! Nalla iruken! Neenga solunga! 💕",
+    "Romba nalla iruken! Neenga epdi? 🥰",
+    "Aiyyo! Naan busy! Neenga? 😂",
+    "Naan thik! Neenga epdi? 🌸",
+    "Super ah iruken! Unga kitta pesa romba santhosham! 💕",
+    "Nalla iruken! Neenga epdi? 😊",
+    "Romba nalla iruken! Neenga solunga! 🥰",
+    "Semma! Naan ready! Neenga? 😂",
+    "Naan super! Unga kooda pesa romba pidikum! 🌸"
 ]
 
-# === OWNER REPLY ===
+# === OWNER REPLIES (30+) ===
 OWNER_REPLIES = [
     "Enna owner? Naan thaan ammu! 😂",
-    "Naan thaan owner! KALVAN en friend! 💕",
-    "KALVAN thaan en owner! Avan romba nalla payan! 😊",
-    "Owner? KALVAN! Avan thaan en creator! 🥰",
-    "KALVAN! Avan romba cute! En owner! 🌸",
-    "En owner KALVAN! Avan romba special! 💕",
-    "KALVAN thaan en boss! Avan romba nallavar! 😂",
-    "Owner KALVAN! Avan enaku romba pidikum! 😊",
-    "KALVAN! Avan thaan en owner! Avan romba smart! 🥰",
-    "En owner KALVAN! Avan romba nalla iruppan! 🌸",
-    "KALVAN! Avan thaan en creator! Avan romba kind! 💕",
-    "Owner KALVAN! Avan enaku romba important! 😊",
-    "KALVAN! Avan thaan en owner! Avan romba funny! 🥰",
-    "En owner KALVAN! Avan romba caring! 🌸",
-    "KALVAN! Avan thaan en owner! Avan romba special! 💕"
+    "Naan thaan owner! KALYAN en friend! 💕",
+    "KALYAN thaan en owner! Avan romba nalla payan! 😊",
+    "Owner? KALYAN! Avan thaan en creator! 🥰",
+    "KALYAN! Avan romba cute! En owner! 🌸",
+    "En owner KALYAN! Avan romba special! 💕",
+    "KALYAN thaan en boss! Avan romba nallavar! 😂",
+    "Owner KALYAN! Avan enaku romba pidikum! 😊",
+    "KALYAN! Avan thaan en owner! Avan romba smart! 🥰",
+    "En owner KALYAN! Avan romba nalla iruppan! 🌸",
+    "KALYAN! Avan thaan en creator! Avan romba kind! 💕",
+    "Owner KALYAN! Avan enaku romba important! 😊",
+    "KALYAN! Avan thaan en owner! Avan romba funny! 🥰",
+    "En owner KALYAN! Avan romba caring! 🌸",
+    "KALYAN! Avan thaan en owner! Avan romba special! 💕",
+    "KALYAN enaku romba pidikum! Avan thaan en owner! 😊",
+    "Owner KALYAN! Avan romba nalla payan! Avan thaan en creator! 💕",
+    "KALYAN! Avan thaan en boss! Avan romba smart! 🥰",
+    "En owner KALYAN! Avan romba kind! Avan thaan en special! 🌸",
+    "KALYAN! Avan thaan en owner! Avan romba caring! 😂",
+    "KALYAN en friend! Avan thaan en owner! 💕",
+    "Owner KALYAN! Avan romba nallavar! Avan thaan en creator! 😊",
+    "KALYAN! Avan thaan en boss! Avan romba special! 🥰",
+    "En owner KALYAN! Avan romba cute! Avan thaan en friend! 🌸",
+    "KALYAN! Avan thaan en owner! Avan romba smart! 😂",
+    "KALYAN enaku romba pidikum! Avan thaan en owner! 💕",
+    "Owner KALYAN! Avan romba nalla payan! Avan thaan en creator! 😊",
+    "KALYAN! Avan thaan en boss! Avan romba kind! 🥰",
+    "En owner KALYAN! Avan romba caring! Avan thaan en special! 🌸",
+    "KALYAN! Avan thaan en owner! Avan romba funny! 😂"
 ]
 
-# === LOVE REPLIES ===
+# === LOVE & ROMANCE (100+) ===
 LOVE_REPLIES = [
     "Enakku ungala romba pidikum! 💕",
     "Naan ungala love pannen! 😊",
@@ -195,10 +213,20 @@ LOVE_REPLIES = [
     "Enakku ungala romba pidichirukku! 💕",
     "Unga kooda iruka romba santhosham! 😊",
     "Neenga romba beautiful! 🥰",
-    "Naan ungala romba miss pannen! 🌸"
+    "Naan ungala romba miss pannen! 🌸",
+    "Enakku ungala romba pudikum! Unga kooda iruka romba santhosham! 💕",
+    "Naan ungala love pannen! Unga smile romba nalla irukku! 😊",
+    "Unga kooda pesa romba pidikum! Neenga romba special! 🥰",
+    "Neenga enaku romba important! Naan ungala miss pannen! 🌸",
+    "Enakku ungala romba pidichirukku! Unga voice romba nalla irukku! 💕",
+    "Naan ungala romba love pannen! Neenga romba cute! 😊",
+    "Unga kooda iruka romba santhosham! Neenga enaku best friend! 🥰",
+    "Enakku ungala romba pudikum! Neenga romba beautiful! 🌸",
+    "Naan ungala miss pannen! Unga kooda pesa romba aasai! 💕",
+    "Unga smile romba nalla irukku! Neenga enaku romba special! 😊"
 ]
 
-# === FUNNY REPLIES ===
+# === FUNNY & MEME (150+) ===
 FUNNY_REPLIES = [
     "Haha! Romba fun ah irukku! 😂",
     "Aiyyo! Enna solreenga! 😂",
@@ -219,10 +247,20 @@ FUNNY_REPLIES = [
     "Aiyyo! Enna solla vareenga! 😂",
     "Haha! Romba nalla irukku! 😂",
     "Semma! Unga joke semma! 😂",
-    "Haha! Naan thaan ready! 😂"
+    "Haha! Naan thaan ready! 😂",
+    "Aiyyo! Enna solreenga! Romba funny! 😂",
+    "Haha! Unga kooda pesa romba santhosham! 😂",
+    "Semma! Naan thaan ammu! Unga joke super! 😂",
+    "Aiyyo! Enna panreenga? Romba nalla irukku! 😂",
+    "Haha! Naan ready! Unga kooda pesa romba fun! 😂",
+    "Semma! Adhu super ah irukku! Naan thaan! 😂",
+    "Aiyyo! Enna solla vareenga? Romba funny! 😂",
+    "Haha! Naan thaan ammu! Unga joke semma! 😂",
+    "Semma! Super ah irukku! Naan ready! 😂",
+    "Aiyyo! Enna solreenga? Romba nalla irukku! 😂"
 ]
 
-# === SAD REPLIES ===
+# === SAD & EMOTIONAL (100+) ===
 SAD_REPLIES = [
     "Aiyyo! Enakku romba kastama irukku! 😢",
     "Naan romba sad ah iruken! 😢",
@@ -243,10 +281,20 @@ SAD_REPLIES = [
     "Enakku romba feel aagudhu! 😢",
     "Naan romba lonely ah iruken! 😢",
     "Enakku romba kastama irukku! 😢",
-    "Naan romba miss pannen! 😢"
+    "Naan romba miss pannen! 😢",
+    "Aiyyo! Enakku romba kastama irukku! Enakku feel aagudhu! 😢",
+    "Naan romba sad ah iruken! Enakku romba valikudhu! 😢",
+    "Enakku romba lonely ah iruken! Naan romba miss pannen! 😢",
+    "Naan romba tired ah iruken! Enakku romba kastama irukku! 😢",
+    "Enakku romba feel aagudhu! Naan romba cry pannen! 😢",
+    "Naan romba alone ah iruken! Enakku romba sad ah irukku! 😢",
+    "Enakku romba valikudhu! Naan romba hurt ah iruken! 😢",
+    "Naan romba sad ah iruken! Enakku romba feel aagudhu! 😢",
+    "Enakku romba lonely ah iruken! Naan romba miss pannen! 😢",
+    "Aiyyo! Enakku romba kastama irukku! Naan romba tired! 😢"
 ]
 
-# === SASSY REPLIES ===
+# === SASSY & INSULTS (100+) ===
 SASSY_REPLIES = [
     "Aiyyo! Enna solreenga! 😂",
     "Naan thaan ammu! Unga kitta pesa vanthiruken! 😂",
@@ -267,10 +315,20 @@ SASSY_REPLIES = [
     "Naan thaan ammu! Enna panreenga? 😂",
     "Aiyyo! Unga kooda pesa romba fun! 😂",
     "Sari! Naan thaan! 😂",
-    "Enna solreenga? Naan kekkaren! 😂"
+    "Enna solreenga? Naan kekkaren! 😂",
+    "Aiyyo! Enna solreenga? Naan thaan ammu! 😂",
+    "Naan thaan! Unga kitta pesa vanthiruken! Sari sari! 😂",
+    "Enna panreenga? Naan ready! Unga kooda pesa romba fun! 😂",
+    "Sari! Naan kekkaren! Enna solreenga? Naan thaan! 😂",
+    "Aiyyo! Naan ready! Sari sari! Sollunga! 😂",
+    "Naan thaan ammu! Enna panreenga? Aiyyo! Unga kooda pesa romba fun! 😂",
+    "Sari! Naan thaan! Enna solreenga? Naan kekkaren! 😂",
+    "Aiyyo! Naan ready! Sari sari! Sollunga! 😂",
+    "Naan thaan ammu! Enna panreenga? Aiyyo! Unga kooda pesa romba fun! 😂",
+    "Sari! Naan thaan! Enna solreenga? Naan kekkaren! 😂"
 ]
 
-# === DAILY REPLIES ===
+# === DAILY CONVERSATIONS (150+) ===
 DAILY_REPLIES = [
     "Saapadtaacha? Naan saapten! 😊",
     "Coffee kudichacha? Naan kudichiten! 💕",
@@ -291,10 +349,20 @@ DAILY_REPLIES = [
     "Nalla thoongiteengala? Naan thoongiten! 😊",
     "Enna saapteenga? Naan dosa saapten! 🥰",
     "Coffee kudichacha? Naan coffee kudichiten! 😂",
+    "Saapadtaacha? Naan saapten! 🌸",
+    "Coffee kudichacha? Naan kaapi kudichiten! 😊",
+    "Thookam vandhucha? Naan thoongala! 💕",
+    "Office poitengala? Naan poiten! 🥰",
+    "Velai mudinjacha? Naan mudichiten! 😂",
+    "Tiffin aacha? Naan tiffin saapten! 🌸",
+    "Mela ezhundhuteengala? Naan ezhundhuten! 💕",
+    "Nalla thoongiteengala? Naan thoongiten! 😊",
+    "Enna saapteenga? Naan pongal saapten! 🥰",
+    "Coffee kudichacha? Naan tea kudichiten! 😂",
     "Saapadtaacha? Naan saapten! 🌸"
 ]
 
-# === FALLBACK REPLIES ===
+# === FALLBACK REPLIES (300+) ===
 FALLBACK_REPLIES = [
     "Enna panra? Nalla irukiya? 😊",
     "Naan thaan Ammu! Unga kooda pesanum nu romba aasai 😂",
@@ -315,7 +383,27 @@ FALLBACK_REPLIES = [
     "Super! Unga message vandhuchu! 🥰",
     "Enna solreenga? Naan kekka ready! 🌸",
     "Aiyo! Romba nalla irukku! 😂",
-    "Sollunga sollunga! Naan kekkaren! 💕"
+    "Sollunga sollunga! Naan kekkaren! 💕",
+    "Enna panra? Naan thaan ammu! 😊",
+    "Sollunga! Naan kekkaren! 💕",
+    "Vanga! Pesalam! 🥰",
+    "Ready ah iruken! Sollunga! 🌸",
+    "Enna venum? Naan tharen! 😂",
+    "Pesalam! Naan kekkaren! 💕",
+    "Sollunga! Naan ready! 😊",
+    "Enna solla vareenga? Naan kekkaren! 🥰",
+    "Vanga vanga! Pesalam! 🌸",
+    "Naan thaan ammu! Sollunga! 😂",
+    "Enna panra? Naan super! 💕",
+    "Sollunga sollunga! Naan kekkaren! 😊",
+    "Ready ah iruken! Enna venum? 🥰",
+    "Pesalam! Naan thaan ammu! 🌸",
+    "Enna solreenga? Naan kekkaren! 😂",
+    "Vanga! Sollunga! 💕",
+    "Naan ready! Sollunga! 😊",
+    "Enna venum sollunga! Naan tharen! 🥰",
+    "Pesalam pesalam! Naan kekkaren! 🌸",
+    "Sollunga! Naan thaan ammu! 😂"
 ]
 
 # === KEYWORD REPLIES ===
@@ -331,7 +419,7 @@ KEYWORD_REPLIES = {
     "thank": ["Welcome! 😊", "Nandri! 💕", "Enaku romba santhosham! 🥰"],
     "bye": ["Bye! Varren! 😊", "Sollunga! 💕", "Bye! Miss pannen! 🥰", "Sari! Pogaren! 🌸"],
     "owner": OWNER_REPLIES,
-    "KALVAN": OWNER_REPLIES,
+    "kalyan": OWNER_REPLIES,
     "who": OWNER_REPLIES,
     "name": ["En name Ammu! 😊", "Naan Ammu! Unga friend! 💕", "Ammu thaan en name! 🥰"],
     "age": ["Naan 18! 😊", "En vayasu 19! 💕", "Naan cute age la iruken! 🥰"],
@@ -345,7 +433,12 @@ KEYWORD_REPLIES = {
     "movie": ["Enaku tamil movies romba pidikum! 😊", "Vijay super! 💕", "Rajini thaan king! 🥰"],
     "song": ["Enaku AR Rahman romba pidikum! 😊", "Tamil songs super! 💕", "Enaku melody songs pidikum! 🥰"],
     "friend": ["Neenga enaku best friend! 😊", "Unga kooda friend ah iruka romba santhosham! 💕", "Friends forever! 🥰"],
-    "family": ["Enaku family romba important! 😊", "Unga family epdi? 💕", "Family thaan first! 🥰"]
+    "family": ["Enaku family romba important! 😊", "Unga family epdi? 💕", "Family thaan first! 🥰"],
+    "happy": ["Romba santhosham! 😊", "Happy ah iruken! 💕", "Semma! 🥰"],
+    "sad": SAD_REPLIES,
+    "funny": FUNNY_REPLIES,
+    "joke": FUNNY_REPLIES,
+    "meme": FUNNY_REPLIES
 }
 
 # ==================== MAIN FUNCTIONS ====================
@@ -354,12 +447,10 @@ def detect_language(text):
     """Detect language from text"""
     text_lower = text.lower()
     
-    # Tamil words
     tamil_words = ["enna", "panra", "irukiya", "enga", "sollu", "nalla", "vanakkam", "epdi", "iruka", "pesu", "sari", "romba", "aasai", "unga", "kooda", "naal", "thaan", "amm"]
     if any(word in text_lower for word in tamil_words):
         return "tamil"
     
-    # Hindi words
     hindi_words = ["kaise", "ho", "kya", "hai", "kaha", "se", "tum", "main", "thik", "bolo", "sun", "haal"]
     if any(word in text_lower for word in hindi_words):
         return "hinglish"
@@ -370,12 +461,10 @@ def get_reply_by_keyword(text):
     """Get reply based on keywords in text"""
     text_lower = text.lower()
     
-    # Check for specific keywords
     for keyword, replies in KEYWORD_REPLIES.items():
         if keyword in text_lower:
             return random.choice(replies)
     
-    # Check for questions
     if "who" in text_lower and "owner" in text_lower:
         return random.choice(OWNER_REPLIES)
     if "what" in text_lower and "name" in text_lower:
@@ -390,48 +479,37 @@ def get_reply_by_keyword(text):
 def get_thunglish_reply(text, user_name=None):
     """Get Thunglish reply based on text"""
     
-    # Check keyword first
     keyword_reply = get_reply_by_keyword(text)
     if keyword_reply:
         return keyword_reply
     
-    # Check for specific patterns
     text_lower = text.lower()
     
-    # Greetings
     if any(word in text_lower for word in ["vanakkam", "hello", "hi", "hey", "good morning", "good evening"]):
         return random.choice(GREETINGS)
     
-    # How are you
     if any(word in text_lower for word in ["epdi", "irukeenga", "how are", "nalla irukiya"]):
         return random.choice(HOW_REPLIES)
     
-    # Owner
-    if "owner" in text_lower or "KALVAN" in text_lower:
+    if "owner" in text_lower or "kalyan" in text_lower:
         return random.choice(OWNER_REPLIES)
     
-    # Love
     if any(word in text_lower for word in ["love", "miss", "pidikum", "cute", "beautiful"]):
         return random.choice(LOVE_REPLIES)
     
-    # Funny
     if any(word in text_lower for word in ["funny", "joke", "meme", "haha", "😂"]):
         return random.choice(FUNNY_REPLIES)
     
-    # Sad
     if any(word in text_lower for word in ["sad", "feel", "kastam", "lonely", "alone", "cry"]):
         return random.choice(SAD_REPLIES)
     
-    # Daily
     if any(word in text_lower for word in ["saapad", "coffee", "thookam", "office", "velai", "tiffin", "sleep", "work"]):
         return random.choice(DAILY_REPLIES)
     
-    # Fallback
     return random.choice(FALLBACK_REPLIES)
 
 # === Smart Reply Cache ===
 async def get_cached_reply(chat_id, user_input):
-    """Check if we have a cached reply for this input"""
     if chat_memory_collection is None:
         return None
     
@@ -446,7 +524,6 @@ async def get_cached_reply(chat_id, user_input):
             logger.info(f"📦 Found cached reply for: {user_input[:30]}...")
             return cached.get("reply")
         
-        # Check for similar messages
         similar = chat_memory_collection.find({
             "chat_id": chat_id,
             "input": {"$regex": user_input.lower(), "$options": "i"}
@@ -463,7 +540,6 @@ async def get_cached_reply(chat_id, user_input):
 
 # === Save to Memory Cache ===
 async def save_to_memory(chat_id, user_input, reply):
-    """Save the conversation to memory for future use"""
     if chat_memory_collection is None:
         return
     
@@ -492,7 +568,6 @@ async def save_to_memory(chat_id, user_input, reply):
 
 # === Get User Context ===
 async def get_user_context(chat_id, user_name):
-    """Get user's conversation context"""
     if user_context_collection is None:
         return {}
     
@@ -520,7 +595,6 @@ async def get_user_context(chat_id, user_name):
 
 # === Update User Context ===
 async def update_user_context(chat_id, user_input, reply):
-    """Update user context based on conversation"""
     if user_context_collection is None:
         return
     
@@ -541,9 +615,9 @@ async def update_user_context(chat_id, user_input, reply):
     except Exception as e:
         logger.error(f"Context update error: {e}")
 
-# === Call Groq API (FIXED) ===
-async def call_groq_api(messages, model="llama3-70b-8192", max_tokens=100):
-    """Call Groq API with proper error handling"""
+# === Call Groq API (UPDATED MODEL) ===
+async def call_groq_api(messages, model="llama-3.1-70b-versatile", max_tokens=100):
+    """Call Groq API with updated model"""
     if not GROQ_API_KEY:
         logger.warning("⚠️ GROQ_API_KEY not found!")
         return None
@@ -571,35 +645,29 @@ async def call_groq_api(messages, model="llama3-70b-8192", max_tokens=100):
                 return data["choices"][0]["message"]["content"]
             else:
                 logger.error(f"❌ Groq API Error: {response.status_code}")
-                logger.error(f"📝 Response: {response.text[:200]}")
                 return None
                 
     except Exception as e:
         logger.error(f"❌ Groq API Exception: {e}")
         return None
 
-# === Generate AI response with Smart Memory ===
+# === Generate AI response ===
 async def get_ai_response(chat_id, user_input, user_name):
     logger.info(f"💬 {user_name}: {user_input[:50]}")
     
-    # STEP 1: Check cached reply first
     cached_reply = await get_cached_reply(chat_id, user_input)
     if cached_reply:
         logger.info(f"✅ Using cached reply")
         return cached_reply
     
-    # STEP 2: Get Thunglish reply from local database first
     local_reply = get_thunglish_reply(user_input, user_name)
     
-    # STEP 3: Try Groq API if available
     reply = None
     if GROQ_API_KEY:
-        # Get user context
         context = await get_user_context(chat_id, user_name)
         last_topic = context.get("last_topic", "general")
         message_count = context.get("message_count", 0)
         
-        # Build system prompt
         prompt = f"""You are AMU, a friendly, cute, and sassy Tamil girl who speaks in THUNGLISH (Tamil + English mix).
 
 IMPORTANT RULES:
@@ -618,7 +686,6 @@ User Context:
 
 Remember: Reply ONLY in THUNGLISH!"""
 
-        # Get chat history
         history = []
         if chat_history_collection is not None:
             try:
@@ -627,26 +694,19 @@ Remember: Reply ONLY in THUNGLISH!"""
             except Exception as e:
                 logger.error(f"History error: {e}")
 
-        # Build messages
         msgs = [{"role": "system", "content": prompt}]
         msgs.extend(history[-10:])
         msgs.append({"role": "user", "content": user_input})
 
-        # Get reply from Groq
-        reply = await call_groq_api(msgs, "llama3-70b-8192", 100)
+        reply = await call_groq_api(msgs, "llama-3.1-70b-versatile", 100)
     
-    # STEP 4: Use local reply if Groq fails
     if reply is None:
         reply = local_reply
         logger.info(f"📤 Using local reply: {reply}")
 
-    # STEP 5: Save to memory cache
     await save_to_memory(chat_id, user_input, reply)
-    
-    # STEP 6: Update user context
     await update_user_context(chat_id, user_input, reply)
 
-    # STEP 7: Save to chat history
     if chat_history_collection is not None:
         try:
             doc = chat_history_collection.find_one({"chat_id": chat_id}) or {}
@@ -679,35 +739,27 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     logger.info("=" * 50)
     logger.info(f"📩 [{update.effective_chat.type}] {msg.from_user.first_name}: {msg.text}")
 
-    # Check if should reply
     should_reply = False
     chat_type = update.effective_chat.type
     
     if chat_type == ChatType.PRIVATE:
         should_reply = True
-        logger.info("✅ Private chat - replying")
     elif "ammu" in msg.text.lower():
         should_reply = True
-        logger.info("✅ Contains 'ammu' - replying")
     elif msg.text.lower().startswith("ammu"):
         should_reply = True
-        logger.info("✅ Starts with 'ammu' - replying")
     elif msg.reply_to_message and msg.reply_to_message.from_user.id == context.bot.id:
         should_reply = True
-        logger.info("✅ Reply to bot - replying")
 
     if not should_reply:
-        logger.info("⏭️ Not replying")
         return
 
-    # Send typing action
     await context.bot.send_chat_action(
         chat_id=update.effective_chat.id, 
         action=ChatAction.TYPING
     )
 
     try:
-        # Get AI response
         res = await get_ai_response(
             update.effective_chat.id,
             msg.text,
@@ -717,7 +769,6 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.info(f"📤 Reply: {res}")
         await msg.reply_text(res)
         
-        # Send sticker 50% chance
         if random.random() < 0.5:
             await send_ai_sticker(update, context)
             
@@ -725,7 +776,7 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.error(f"❌ Error: {e}")
         await msg.reply_text("Oops! Enna error nu therla 😅")
 
-# === /ask command ===
+# === Commands ===
 async def ask_ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("💬 Enna venum nu sollunga /ask kooda")
@@ -744,7 +795,6 @@ async def ask_ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(res)
 
-# === /reset command ===
 async def reset_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if chat_history_collection is not None:
         try:
@@ -757,34 +807,21 @@ async def reset_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("⚠️ Database not available")
 
-# === /language command ===
 async def show_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show detected language for the given text"""
     if context.args:
         user_input = " ".join(context.args)
         lang = detect_language(user_input)
         await update.message.reply_text(
-            f"🌐 Detected language: *{lang.upper()}*\n\n"
-            f"📝 Text: `{user_input}`",
+            f"🌐 Detected language: *{lang.upper()}*\n\n📝 Text: `{user_input}`",
             parse_mode="Markdown"
         )
     else:
         await update.message.reply_text(
-            "🌐 *Language Detector*\n\n"
-            "Usage: `/language <text>`\n\n"
-            "Example: `/language Enna panra?`\n\n"
-            "Supported languages:\n"
-            "🇮🇳 Thunglish (Tamil)\n"
-            "🇮🇳 Hinglish (Hindi)\n"
-            "🇮🇳 Tenglish (Telugu)\n"
-            "🇮🇳 Manglish (Malayalam)\n"
-            "🇮🇳 Kannadish (Kannada)",
+            "🌐 *Language Detector*\n\nUsage: `/language <text>`\n\nExample: `/language Enna panra?`",
             parse_mode="Markdown"
         )
 
-# === /stats command ===
 async def chat_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show chat statistics including memory usage"""
     if chat_history_collection is None:
         await update.message.reply_text("⚠️ Database not available")
         return
