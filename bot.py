@@ -34,7 +34,13 @@ from commands.game import register_game_commands
 from commands.admin import register_admin_commands
 from commands.logger import register_logger
 from commands.broadcast import register_broadcast
-from commands.chatbot import ask_ai, ai_message_handler, reset_chat, show_language
+from commands.chatbot import (
+    ask_ai, 
+    ai_message_handler, 
+    reset_chat, 
+    show_language,
+    chat_stats
+)
 from commands.couple import couple
 from commands.shop import items, item, gift
 from commands.quote import q
@@ -102,14 +108,16 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "talk_ammu":
         await query.message.reply_text("Haan bolo! Main sun rahi hu 💕")
 
-# ================== AI HANDLER - GROQ + MULTI-LANGUAGE ==================
+# ================== AI HANDLER - GROQ + THUNGLISH + SMART MEMORY ==================
 async def safe_ai_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    AI Handler with Groq + Multi-language support
+    AI Handler with:
+    - Groq API
+    - Thunglish (Tamil + English)
+    - Smart Memory Cache
     - Private chat: Always reply
     - Group chat: Only if message contains 'ammu'
     - No typing loop
-    - Supports Thunglish, Hinglish, Tenglish, Manglish, Kannadish
     """
     if not update.message or not update.message.text:
         return
@@ -121,12 +129,17 @@ async def safe_ai_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Private chat - always reply
     if chat_type == "private":
         should_reply = True
+        logging.info(f"💬 Private chat: {update.message.text}")
+    
     # Group chat - only if contains "ammu"
     elif "ammu" in update.message.text.lower():
         should_reply = True
+        logging.info(f"💬 Group chat with 'ammu': {update.message.text}")
+    
     # Reply to bot's message
     elif update.message.reply_to_message and update.message.reply_to_message.from_user.id == context.bot.id:
         should_reply = True
+        logging.info(f"💬 Reply to bot: {update.message.text}")
 
     if not should_reply:
         return
@@ -203,10 +216,11 @@ def main():
     register_admin_commands(app)
     register_radhe(app)
 
-    # ---------- AI COMMANDS (GROQ + MULTI-LANGUAGE) ----------
-    app.add_handler(CommandHandler("ask", ask_ai))
-    app.add_handler(CommandHandler("reset", reset_chat))  # Clear chat history
-    app.add_handler(CommandHandler("language", show_language))  # Detect language
+    # ---------- AI COMMANDS (GROQ + THUNGLISH + SMART MEMORY) ----------
+    app.add_handler(CommandHandler("ask", ask_ai))          # Ask anything
+    app.add_handler(CommandHandler("reset", reset_chat))    # Clear chat history & memory
+    app.add_handler(CommandHandler("language", show_language)) # Detect language
+    app.add_handler(CommandHandler("stats", chat_stats))    # Show chat statistics
     
     # ---------- AI MESSAGE HANDLER ----------
     app.add_handler(
@@ -216,9 +230,22 @@ def main():
     # ---------- ERROR ----------
     app.add_error_handler(error_handler)
 
-    print("✅ Ammu Bot Online with Groq + Multi-language support!")
-    print("🌐 Languages: Thunglish, Hinglish, Tenglish, Manglish, Kannadish")
+    print("=" * 50)
+    print("✅ Ammu Bot Online with Smart Memory!")
+    print("=" * 50)
+    print("🤖 AI Engine: Groq (Llama3-70b)")
+    print("🌐 Language: Thunglish (Tamil + English)")
+    print("🧠 Memory: Smart Cache System")
+    print("📊 Features: Chat History, User Context, Cached Replies")
     print("💬 Trigger: 'ammu' in groups | Always reply in private")
+    print("=" * 50)
+    print("📝 Commands:")
+    print("  /ask <question>  - Ask anything")
+    print("  /reset           - Clear chat history & memory")
+    print("  /language <text> - Detect language")
+    print("  /stats           - Show chat statistics")
+    print("=" * 50)
+    
     app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
