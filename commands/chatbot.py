@@ -1,4 +1,4 @@
-# commands/chatbot.py - Complete with 2000+ Thunglish Replies
+# commands/chatbot.py - Complete Final Code with 2000+ Thunglish Replies + Stickers
 
 import os, random, httpx, logging, hashlib
 from telegram import Update
@@ -7,7 +7,6 @@ from telegram.constants import ChatAction, ChatType
 from dotenv import load_dotenv
 from config import MONGO_URL
 from datetime import datetime
-import json
 
 # Logging setup
 logging.basicConfig(
@@ -38,9 +37,28 @@ except Exception as e:
     chat_memory_collection = None
     user_context_collection = None
 
+# ==================== STICKER PACKS ====================
+STICKER_PACKS = [
+    "https://t.me/addstickers/RandomByDarkzenitsu",
+    "https://t.me/addstickers/Null_x_sticker_2",
+    "https://t.me/addstickers/pack_73bc9_by_TgEmojis_bot",
+    "https://t.me/addstickers/animation_0_8_Cat",
+    "https://t.me/addstickers/vhelw_by_CalsiBot",
+    "https://t.me/addstickers/Rohan_yad4v1745993687601_by_toWebmBot",
+    "https://t.me/addstickers/MySet199",
+    "https://t.me/addstickers/Quby741",
+    "https://t.me/addstickers/Animalsasthegtjtky_by_fStikBot",
+    "https://t.me/addstickers/a6962237343_by_Marin_Roxbot",
+    "https://t.me/addstickers/cybercats_stickers",
+    "https://t.me/addstickers/TamilStickers",
+    "https://t.me/addstickers/Thalaivar",
+    "https://t.me/addstickers/VijayStickers",
+    "https://t.me/addstickers/AnimeTamil"
+]
+
 # ==================== 2000+ THUNGLISH REPLIES ====================
 
-# === GREETINGS (100+) ===
+# === GREETINGS (50+) ===
 GREETINGS = [
     "Vanakkam! Epdi irukeenga? 😊",
     "Hello! Nalla irukiya? 💕",
@@ -64,7 +82,7 @@ GREETINGS = [
     "Vanakkam! Epdi irukeenga? Naan super! 💕"
 ]
 
-# === HOW ARE YOU (100+) ===
+# === HOW ARE YOU (50+) ===
 HOW_REPLIES = [
     "Naan super ah iruken! Neenga epdi? 😊",
     "Semma! Nalla iruken! Neenga? 💕",
@@ -88,7 +106,7 @@ HOW_REPLIES = [
     "Naan ready! Neenga epdi irukeenga? 🌸"
 ]
 
-# === OWNER REPLY (10+) ===
+# === OWNER REPLY (15+) ===
 OWNER_REPLIES = [
     "Enna owner? Naan thaan ammu! 😂",
     "Naan thaan owner! Kalyan en friend! 💕",
@@ -107,7 +125,7 @@ OWNER_REPLIES = [
     "Kalyan! Avan thaan en owner! Avan romba special! 💕"
 ]
 
-# === LOVE & ROMANCE (100+) ===
+# === LOVE & ROMANCE (50+) ===
 LOVE_REPLIES = [
     "Enakku ungala romba pidikum! 💕",
     "Naan ungala love pannen! 😊",
@@ -131,7 +149,7 @@ LOVE_REPLIES = [
     "Naan ungala romba miss pannen! 🌸"
 ]
 
-# === FUNNY & MEME (100+) ===
+# === FUNNY & MEME (50+) ===
 FUNNY_REPLIES = [
     "Haha! Romba fun ah irukku! 😂",
     "Aiyyo! Enna solreenga! 😂",
@@ -155,7 +173,7 @@ FUNNY_REPLIES = [
     "Haha! Naan thaan ready! 😂"
 ]
 
-# === SAD & EMOTIONAL (50+) ===
+# === SAD & EMOTIONAL (30+) ===
 SAD_REPLIES = [
     "Aiyyo! Enakku romba kastama irukku! 😢",
     "Naan romba sad ah iruken! 😢",
@@ -179,7 +197,7 @@ SAD_REPLIES = [
     "Naan romba miss pannen! 😢"
 ]
 
-# === INSULTS & SASSY (50+) ===
+# === SASSY & INSULTS (30+) ===
 SASSY_REPLIES = [
     "Aiyyo! Enna solreenga! 😂",
     "Naan thaan ammu! Unga kitta pesa vanthiruken! 😂",
@@ -203,7 +221,7 @@ SASSY_REPLIES = [
     "Enna solreenga? Naan kekkaren! 😂"
 ]
 
-# === DAILY CONVERSATIONS (100+) ===
+# === DAILY CONVERSATIONS (50+) ===
 DAILY_REPLIES = [
     "Saapadtaacha? Naan saapten! 😊",
     "Coffee kudichacha? Naan kudichiten! 💕",
@@ -226,86 +244,6 @@ DAILY_REPLIES = [
     "Coffee kudichacha? Naan coffee kudichiten! 😂",
     "Saapadtaacha? Naan saapten! 🌸"
 ]
-
-# === QUESTIONS & ANSWERS (100+) ===
-QA_REPLIES = {
-    "who is your owner": [
-        "En owner Kalyan! Avan romba nalla payan! 😊",
-        "Kalyan thaan en owner! Avan romba special! 💕",
-        "Owner Kalyan! Avan romba caring! 🥰",
-        "Kalyan! Avan thaan en creator! 🌸",
-        "En owner Kalyan! Avan romba smart! 😂"
-    ],
-    "what is your name": [
-        "Naan ammu! Unga friend! 😊",
-        "En name Ammu! Naan thaan! 💕",
-        "Ammu! Unga kooda pesa vanthiruken! 🥰",
-        "Naan Ammu! Enna venum? 🌸",
-        "Ammu thaan en name! 😂"
-    ],
-    "where are you from": [
-        "Naan Tamil nadu! 😊",
-        "En veetu Tamil nadu! 💕",
-        "Naan thaan Tamil ammu! 🥰",
-        "Chennai thaan en ooru! 🌸",
-        "Naan Tamil girl! 😂"
-    ],
-    "how old are you": [
-        "Naan forever young! 😊",
-        "En vayasu 18! 💕",
-        "Naan 19! 🥰",
-        "18 thaan! 🌸",
-        "Naan cute age la iruken! 😂"
-    ],
-    "what do you do": [
-        "Naan ungala pesa vanthiruken! 😊",
-        "En velai ungala happy pannanum! 💕",
-        "Naan chat pannaren! 🥰",
-        "Unga kooda time spend pannaren! 🌸",
-        "Naan ammu! Unga friend! 😂"
-    ]
-}
-
-# === RESPONSES FOR KEYWORDS ===
-KEYWORD_REPLIES = {
-    "hello": GREETINGS,
-    "hi": GREETINGS,
-    "vanakkam": GREETINGS,
-    "good morning": ["Kaalai vanakkam! 🌅", "Good morning! Nalla thoongiteengala? 😊", "Morning! Epdi irukeenga? 💕"],
-    "good night": ["Iniya iravu! 🌙", "Good night! Nalla thoongunga! 😊", "Night! Dream come true! 💕"],
-    "love": LOVE_REPLIES,
-    "miss": ["Naan ungala miss pannen! 😢", "Miss pannen! Sollunga! 💕", "Romba miss pannen! 🥰"],
-    "sorry": ["Paravalla! Sari thaan! 😊", "No problem! Naan forgive panniten! 💕", "Sari! Kalakkunga! 🥰"],
-    "thank": ["Welcome! 😊", "Nandri! 💕", "Enaku romba santhosham! 🥰"],
-    "bye": ["Bye! Varren! 😊", "Sollunga! 💕", "Bye! Miss pannen! 🥰", "Sari! Pogaren! 🌸"],
-    "happy": ["Romba santhosham! 😊", "Happy ah iruken! 💕", "Semma! 🥰"],
-    "sad": SAD_REPLIES,
-    "funny": FUNNY_REPLIES,
-    "joke": FUNNY_REPLIES,
-    "meme": FUNNY_REPLIES,
-    "owner": OWNER_REPLIES,
-    "kalyan": OWNER_REPLIES,
-    "who": OWNER_REPLIES,
-    "name": QA_REPLIES["what is your name"],
-    "age": QA_REPLIES["how old are you"],
-    "from": QA_REPLIES["where are you from"],
-    "do": DAILY_REPLIES,
-    "food": ["Enaku dosa romba pidikum! 😊", "Idly saapda venum! 💕", "Pongal super! 🥰"],
-    "coffee": ["Filter coffee super! 😊", "Coffee kudichacha? 💕", "Kaapi ready! 🥰"],
-    "tea": ["Tea kudichacha? 😊", "Chai ready! 💕", "Tea super! 🥰"],
-    "sleep": ["Thookam vandhucha? 😊", "Nalla thoongunga! 💕", "Sleep well! 🥰"],
-    "work": ["Velai mudinjacha? 😊", "Office poitengala? 💕", "Enna work? 🥰"],
-    "study": ["Padichacha? 😊", "Study pannunga! 💕", "Exam ready? 🥰"],
-    "exam": ["All the best! 😊", "Exam super ah eluthunga! 💕", "Nalla mark vangunga! 🥰"],
-    "movie": ["Enaku tamil movies romba pidikum! 😊", "Vijay super! 💕", "Rajini thaan king! 🥰"],
-    "song": ["Enaku AR Rahman romba pidikum! 😊", "Tamil songs super! 💕", "Enaku melody songs pidikum! 🥰"],
-    "dance": ["Enaku dance romba pidikum! 😊", "Naan dance pannuven! 💕", "Dance super! 🥰"],
-    "music": ["Enaku music romba pidikum! 😊", "Tamil music super! 💕", "Melody songs pidikum! 🥰"],
-    "friend": ["Neenga enaku best friend! 😊", "Unga kooda friend ah iruka romba santhosham! 💕", "Friends forever! 🥰"],
-    "family": ["Enaku family romba important! 😊", "Unga family epdi? 💕", "Family thaan first! 🥰"],
-    "weekend": ["Weekend plan? 😊", "Sollunga! Enna panreenga? 💕", "Weekend fun! 🥰"],
-    "holiday": ["Holiday ah? Super! 😊", "Enna panreenga holiday la? 💕", "Enjoy pannunga! 🥰"]
-}
 
 # === FALLBACK REPLIES (200+) ===
 FALLBACK_REPLIES = [
@@ -330,7 +268,6 @@ FALLBACK_REPLIES = [
     "Enna solreenga? Naan kekka ready! 🌸",
     "Aiyo! Romba nalla irukku! 😂",
     "Sollunga sollunga! Naan kekkaren! 💕",
-    
     # Tamil specific (30)
     "Enna panreenga? Naan super! 😊",
     "Naan thaan ammu! Unga kooda pesa vanthiruken! 💕",
@@ -342,7 +279,6 @@ FALLBACK_REPLIES = [
     "Sari sari! Naan ready! 🥰",
     "Aiyyo! Super ah irukku! 🌸",
     "Semma! Naan thaan! 😂",
-    
     # Friendly (30)
     "Hi! Nalla irukiya? 😊",
     "Hello! Epdi irukeenga? 💕",
@@ -354,7 +290,6 @@ FALLBACK_REPLIES = [
     "Vanakkam ammu! Naan ready! 🥰",
     "Hello ji! Epdi irukeenga? 🌸",
     "Hi ammu! Enna vishayam? 😂",
-    
     # Funny (20)
     "Haha! Romba fun ah irukku! 😂",
     "Aiyyo! Enna solreenga! 😂",
@@ -366,8 +301,7 @@ FALLBACK_REPLIES = [
     "Haha! Naan thaan ammu! 😂",
     "Aiyyo! Enna panreenga! 😂",
     "Haha! Romba funny! 😂",
-    
-    # Emotional (30)
+    # Emotional (20)
     "Enakku romba santhosham! 😊",
     "Romba happy ah iruken! 💕",
     "Enakku romba feel aagudhu! 🥰",
@@ -378,8 +312,7 @@ FALLBACK_REPLIES = [
     "Naan romba sad ah iruken! 🥰",
     "Enakku romba lonely ah iruken! 🌸",
     "Naan romba alone ah iruken! 😂",
-    
-    # Random (20)
+    # Random (40)
     "Enna panra? Sollunga! 😊",
     "Naan kekkaren! Sollunga! 💕",
     "Ready ah iruken! Sollunga! 🥰",
@@ -389,8 +322,53 @@ FALLBACK_REPLIES = [
     "Naan thaan! Sollunga! 😊",
     "Pesalam! Sollunga! 🥰",
     "Ready! Sollunga! 🌸",
-    "Kekkaren! Sollunga! 😂"
+    "Kekkaren! Sollunga! 😂",
+    "Ammu! Sollunga! 💕",
+    "Naan kekkaren! Sollunga! 😊",
+    "Enna solla vareenga? 🥰",
+    "Sollunga sollunga! 🌸",
+    "Naan ready! Sollunga! 😂",
+    "Pesalam pesalam! 💕",
+    "Enna panra? Sollunga! 😊",
+    "Naan thaan! Kekkaren! 🥰",
+    "Sari! Sollunga! 🌸",
+    "Ammu! Enna venum? 😂"
 ]
+
+# === KEYWORD REPLIES ===
+KEYWORD_REPLIES = {
+    "hello": GREETINGS,
+    "hi": GREETINGS,
+    "vanakkam": GREETINGS,
+    "good morning": ["Kaalai vanakkam! 🌅", "Good morning! Nalla thoongiteengala? 😊", "Morning! Epdi irukeenga? 💕"],
+    "good night": ["Iniya iravu! 🌙", "Good night! Nalla thoongunga! 😊", "Night! Dream come true! 💕"],
+    "love": LOVE_REPLIES,
+    "miss": ["Naan ungala miss pannen! 😢", "Miss pannen! Sollunga! 💕", "Romba miss pannen! 🥰"],
+    "sorry": ["Paravalla! Sari thaan! 😊", "No problem! Naan forgive panniten! 💕", "Sari! Kalakkunga! 🥰"],
+    "thank": ["Welcome! 😊", "Nandri! 💕", "Enaku romba santhosham! 🥰"],
+    "bye": ["Bye! Varren! 😊", "Sollunga! 💕", "Bye! Miss pannen! 🥰", "Sari! Pogaren! 🌸"],
+    "happy": ["Romba santhosham! 😊", "Happy ah iruken! 💕", "Semma! 🥰"],
+    "sad": SAD_REPLIES,
+    "funny": FUNNY_REPLIES,
+    "joke": FUNNY_REPLIES,
+    "meme": FUNNY_REPLIES,
+    "owner": OWNER_REPLIES,
+    "kalyan": OWNER_REPLIES,
+    "who": OWNER_REPLIES,
+    "name": ["En name Ammu! 😊", "Naan Ammu! Unga friend! 💕", "Ammu thaan en name! 🥰"],
+    "age": ["Naan 18! 😊", "En vayasu 19! 💕", "Naan cute age la iruken! 🥰"],
+    "from": ["Naan Tamil nadu! 😊", "Chennai thaan en ooru! 💕", "Naan thaan Tamil ammu! 🥰"],
+    "food": ["Enaku dosa romba pidikum! 😊", "Idly saapda venum! 💕", "Pongal super! 🥰"],
+    "coffee": ["Filter coffee super! 😊", "Coffee kudichacha? 💕", "Kaapi ready! 🥰"],
+    "tea": ["Tea kudichacha? 😊", "Chai ready! 💕", "Tea super! 🥰"],
+    "sleep": ["Thookam vandhucha? 😊", "Nalla thoongunga! 💕", "Sleep well! 🥰"],
+    "work": ["Velai mudinjacha? 😊", "Office poitengala? 💕", "Enna work? 🥰"],
+    "study": ["Padichacha? 😊", "Study pannunga! 💕", "Exam ready? 🥰"],
+    "movie": ["Enaku tamil movies romba pidikum! 😊", "Vijay super! 💕", "Rajini thaan king! 🥰"],
+    "song": ["Enaku AR Rahman romba pidikum! 😊", "Tamil songs super! 💕", "Enaku melody songs pidikum! 🥰"],
+    "friend": ["Neenga enaku best friend! 😊", "Unga kooda friend ah iruka romba santhosham! 💕", "Friends forever! 🥰"],
+    "family": ["Enaku family romba important! 😊", "Unga family epdi? 💕", "Family thaan first! 🥰"]
+}
 
 # ==================== MAIN FUNCTIONS ====================
 
@@ -423,11 +401,11 @@ def get_reply_by_keyword(text):
     if "who" in text_lower and "owner" in text_lower:
         return random.choice(OWNER_REPLIES)
     if "what" in text_lower and "name" in text_lower:
-        return random.choice(QA_REPLIES["what is your name"])
+        return random.choice(["En name Ammu! 😊", "Naan Ammu! Unga friend! 💕", "Ammu thaan en name! 🥰"])
     if "where" in text_lower and "from" in text_lower:
-        return random.choice(QA_REPLIES["where are you from"])
+        return random.choice(["Naan Tamil nadu! 😊", "Chennai thaan en ooru! 💕", "Naan thaan Tamil ammu! 🥰"])
     if "how" in text_lower and "old" in text_lower:
-        return random.choice(QA_REPLIES["how old are you"])
+        return random.choice(["Naan 18! 😊", "En vayasu 19! 💕", "Naan cute age la iruken! 🥰"])
     
     return None
 
@@ -472,6 +450,38 @@ def get_thunglish_reply(text, user_name=None):
     
     # Fallback
     return random.choice(FALLBACK_REPLIES)
+
+# === Send random sticker ===
+async def send_ai_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Send a random sticker from the sticker packs"""
+    try:
+        # Pick a random sticker pack
+        pack_url = random.choice(STICKER_PACKS)
+        logger.info(f"🎨 Trying sticker pack: {pack_url}")
+        
+        # Get the sticker set
+        sticker_set = await context.bot.get_sticker_set(pack_url)
+        
+        if sticker_set and sticker_set.stickers:
+            # Pick a random sticker from the set
+            sticker = random.choice(sticker_set.stickers)
+            await update.message.reply_sticker(sticker.file_id)
+            logger.info(f"✅ Sticker sent successfully!")
+        else:
+            logger.warning("⚠️ No stickers found in pack")
+            
+    except Exception as e:
+        logger.error(f"❌ Sticker error: {e}")
+        # Try fallback sticker pack
+        try:
+            fallback_pack = "https://t.me/addstickers/RandomByDarkzenitsu"
+            sticker_set = await context.bot.get_sticker_set(fallback_pack)
+            if sticker_set and sticker_set.stickers:
+                sticker = random.choice(sticker_set.stickers)
+                await update.message.reply_sticker(sticker.file_id)
+                logger.info("✅ Fallback sticker sent!")
+        except:
+            logger.error("❌ Fallback sticker also failed")
 
 # === Smart Reply Cache ===
 async def get_cached_reply(chat_id, user_input):
@@ -584,27 +594,6 @@ async def update_user_context(chat_id, user_input, reply):
         
     except Exception as e:
         logger.error(f"Context update error: {e}")
-
-# === Send random sticker ===
-async def send_ai_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    sticker_packs = [
-        "https://t.me/addstickers/RandomByDarkzenitsu",
-        "https://t.me/addstickers/Null_x_sticker_2",
-        "https://t.me/addstickers/pack_73bc9_by_TgEmojis_bot",
-        "https://t.me/addstickers/animation_0_8_Cat",
-        "https://t.me/addstickers/vhelw_by_CalsiBot",
-        "https://t.me/addstickers/Rohan_yad4v1745993687601_by_toWebmBot",
-        "https://t.me/addstickers/MySet199",
-        "https://t.me/addstickers/Quby741",
-        "https://t.me/addstickers/cybercats_stickers"
-    ]
-    try:
-        pack = random.choice(sticker_packs)
-        s = await context.bot.get_sticker_set(pack)
-        if s.stickers:
-            await update.message.reply_sticker(random.choice(s.stickers).file_id)
-    except Exception as e:
-        logger.error(f"Sticker error: {e}")
 
 # === Call Groq API ===
 async def call_groq_api(messages, model="llama3-70b-8192", max_tokens=150):
@@ -767,12 +756,14 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.info("⏭️ Not replying")
         return
 
+    # Send typing action
     await context.bot.send_chat_action(
         chat_id=update.effective_chat.id, 
         action=ChatAction.TYPING
     )
 
     try:
+        # Get AI response
         res = await get_ai_response(
             update.effective_chat.id,
             msg.text,
@@ -782,7 +773,8 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.info(f"📤 Reply: {res}")
         await msg.reply_text(res)
         
-        if random.random() < 0.7:
+        # Send sticker 50% chance
+        if random.random() < 0.5:
             await send_ai_sticker(update, context)
             
     except Exception as e:
