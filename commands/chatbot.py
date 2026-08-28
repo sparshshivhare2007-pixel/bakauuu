@@ -1,4 +1,4 @@
-# commands/chatbot.py - FINAL COMPLETE VERSION with 2000+ Thunglish Words + Random Stickers
+# commands/chatbot.py - FINAL COMPLETE VERSION with 2000+ Thunglish Words + Updated Stickers
 
 import os, random, httpx, logging, hashlib
 from telegram import Update
@@ -37,17 +37,23 @@ except Exception as e:
     chat_memory_collection = None
     user_context_collection = None
 
-# ==================== STICKER SET NAMES ====================
+# ==================== UPDATED STICKER SET NAMES ====================
 STICKER_SETS = [
+    "Mizocatty",                    # New
+    "Rohan_yad4v1745993687601_by_toWebmBot",
+    "animation_0_8_Cat",
+    "Butterfly281",                 # New
+    "Hutty_by_fStikBot",            # New
+    "Azaaaaan",                     # New
+    "Webp_16",                      # New
+    "Webp_17Cute",                  # New
     "RandomByDarkzenitsu",
     "Null_x_sticker_2",
     "pack_73bc9_by_TgEmojis_bot",
-    "animation_0_8_Cat",
     "vhelw_by_CalsiBot",
     "MySet199",
     "Quby741",
     "cybercats_stickers",
-    "Rohan_yad4v1745993687601_by_toWebmBot",
     "a6962237343_by_Marin_Roxbot"
 ]
 
@@ -77,36 +83,30 @@ async def send_ai_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send a random sticker from the sticker sets"""
     try:
         logger.info("🎨 SENDING STICKER...")
-        sticker_set_name = random.choice(STICKER_SETS)
-        logger.info(f"🔄 Trying: {sticker_set_name}")
         
-        sticker_set = await context.bot.get_sticker_set(sticker_set_name)
+        # Shuffle and try all sets
+        shuffled_sets = STICKER_SETS.copy()
+        random.shuffle(shuffled_sets)
         
-        if sticker_set and sticker_set.stickers:
-            sticker = random.choice(sticker_set.stickers)
-            await update.message.reply_sticker(sticker.file_id)
-            logger.info(f"✅ Sticker sent from: {sticker_set_name}")
-            return True
-        else:
-            logger.warning(f"⚠️ No stickers in set: {sticker_set_name}")
-            return False
-            
-    except Exception as e:
-        logger.error(f"❌ Sticker error: {str(e)}")
-        
-        # Try fallback
-        fallback_sets = ["RandomByDarkzenitsu", "Null_x_sticker_2"]
-        for fallback in fallback_sets:
+        for sticker_set_name in shuffled_sets:
             try:
-                sticker_set = await context.bot.get_sticker_set(fallback)
+                logger.info(f"🔄 Trying: {sticker_set_name}")
+                sticker_set = await context.bot.get_sticker_set(sticker_set_name)
+                
                 if sticker_set and sticker_set.stickers:
                     sticker = random.choice(sticker_set.stickers)
                     await update.message.reply_sticker(sticker.file_id)
-                    logger.info(f"✅ Fallback sticker sent: {fallback}")
+                    logger.info(f"✅ Sticker sent from: {sticker_set_name}")
                     return True
-            except:
+            except Exception as e:
+                logger.warning(f"⚠️ Failed {sticker_set_name}: {e}")
                 continue
         
+        logger.warning("⚠️ No sticker sets worked")
+        return False
+            
+    except Exception as e:
+        logger.error(f"❌ Sticker error: {str(e)}")
         return False
 
 # === SEND STICKER BY KEYWORD ===
