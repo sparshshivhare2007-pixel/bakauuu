@@ -221,35 +221,35 @@ HOW_REPLIES = [
 # === OWNER REPLIES (30+) ===
 OWNER_REPLIES = [
     "Enna owner? Naan thaan ammu! 😂",
-    "Naan thaan owner! KALYAN en friend! 💕",
-    "KALYAN thaan en owner! Avan romba nalla payan! 😊",
-    "Owner? KALYAN! Avan thaan en creator! 🥰",
-    "KALYAN! Avan romba cute! En owner! 🌸",
-    "En owner KALYAN! Avan romba special! 💕",
-    "KALYAN thaan en boss! Avan romba nallavar! 😂",
-    "Owner KALYAN! Avan enaku romba pidikum! 😊",
-    "KALYAN! Avan thaan en owner! Avan romba smart! 🥰",
-    "En owner KALYAN! Avan romba nalla iruppan! 🌸",
-    "KALYAN! Avan thaan en creator! Avan romba kind! 💕",
-    "Owner KALYAN! Avan enaku romba important! 😊",
-    "KALYAN! Avan thaan en owner! Avan romba funny! 🥰",
-    "En owner KALYAN! Avan romba caring! 🌸",
-    "KALYAN! Avan thaan en owner! Avan romba special! 💕",
-    "KALYAN enaku romba pidikum! Avan thaan en owner! 😊",
-    "Owner KALYAN! Avan romba nalla payan! Avan thaan en creator! 💕",
-    "KALYAN! Avan thaan en boss! Avan romba smart! 🥰",
-    "En owner KALYAN! Avan romba kind! Avan thaan en special! 🌸",
-    "KALYAN! Avan thaan en owner! Avan romba caring! 😂",
-    "KALYAN en friend! Avan thaan en owner! 💕",
-    "Owner KALYAN! Avan romba nallavar! Avan thaan en creator! 😊",
-    "KALYAN! Avan thaan en boss! Avan romba special! 🥰",
-    "En owner KALYAN! Avan romba cute! Avan thaan en friend! 🌸",
-    "KALYAN! Avan thaan en owner! Avan romba smart! 😂",
-    "KALYAN enaku romba pidikum! Avan thaan en owner! 💕",
-    "Owner KALYAN! Avan romba nalla payan! Avan thaan en creator! 😊",
-    "KALYAN! Avan thaan en boss! Avan romba kind! 🥰",
-    "En owner KALYAN! Avan romba caring! Avan thaan en special! 🌸",
-    "KALYAN! Avan thaan en owner! Avan romba funny! 😂"
+    "Naan thaan owner! kalvan en friend! 💕",
+    "kalvan thaan en owner! Avan romba nalla payan! 😊",
+    "Owner? kalvan! Avan thaan en creator! 🥰",
+    "kalvan! Avan romba cute! En owner! 🌸",
+    "En owner kalvan! Avan romba special! 💕",
+    "kalvan thaan en boss! Avan romba nallavar! 😂",
+    "Owner kalvan! Avan enaku romba pidikum! 😊",
+    "kalvan! Avan thaan en owner! Avan romba smart! 🥰",
+    "En owner kalvan! Avan romba nalla iruppan! 🌸",
+    "kalvan! Avan thaan en creator! Avan romba kind! 💕",
+    "Owner kalvan! Avan enaku romba important! 😊",
+    "kalvan! Avan thaan en owner! Avan romba funny! 🥰",
+    "En owner kalvan! Avan romba caring! 🌸",
+    "kalvan! Avan thaan en owner! Avan romba special! 💕",
+    "kalvan enaku romba pidikum! Avan thaan en owner! 😊",
+    "Owner kalvan! Avan romba nalla payan! Avan thaan en creator! 💕",
+    "kalvan! Avan thaan en boss! Avan romba smart! 🥰",
+    "En owner kalvan! Avan romba kind! Avan thaan en special! 🌸",
+    "kalvan! Avan thaan en owner! Avan romba caring! 😂",
+    "kalvan en friend! Avan thaan en owner! 💕",
+    "Owner kalvan! Avan romba nallavar! Avan thaan en creator! 😊",
+    "kalvan! Avan thaan en boss! Avan romba special! 🥰",
+    "En owner kalvan! Avan romba cute! Avan thaan en friend! 🌸",
+    "kalvan! Avan thaan en owner! Avan romba smart! 😂",
+    "kalvan enaku romba pidikum! Avan thaan en owner! 💕",
+    "Owner kalvan! Avan romba nalla payan! Avan thaan en creator! 😊",
+    "kalvan! Avan thaan en boss! Avan romba kind! 🥰",
+    "En owner kalvan! Avan romba caring! Avan thaan en special! 🌸",
+    "kalvan! Avan thaan en owner! Avan romba funny! 😂"
 ]
 
 # === LOVE & ROMANCE (100+) ===
@@ -504,7 +504,7 @@ KEYWORD_REPLIES = {
     "thank": ["Welcome! 😊", "Nandri! 💕", "Enaku romba santhosham! 🥰"],
     "bye": ["Bye! Varren! 😊", "Sollunga! 💕", "Bye! Miss pannen! 🥰", "Sari! Pogaren! 🌸"],
     "owner": OWNER_REPLIES,
-    "kalyan": OWNER_REPLIES,
+    "kalvan": OWNER_REPLIES,
     "who": OWNER_REPLIES,
     "name": ["En name Ammu! 😊", "Naan Ammu! Unga friend! 💕", "Ammu thaan en name! 🥰"],
     "age": ["Naan 18! 😊", "En vayasu 19! 💕", "Naan cute age la iruken! 🥰"],
@@ -583,7 +583,7 @@ def get_thunglish_reply(text, user_name=None):
     if any(word in text_lower for word in ["epdi", "irukeenga", "how are", "nalla irukiya"]):
         return random.choice(HOW_REPLIES)
     
-    if "owner" in text_lower or "kalyan" in text_lower:
+    if "owner" in text_lower or "kalvan" in text_lower:
         return random.choice(OWNER_REPLIES)
     
     if any(word in text_lower for word in ["love", "miss", "pidikum", "cute", "beautiful"]):
