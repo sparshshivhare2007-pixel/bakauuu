@@ -1,4 +1,4 @@
-# commands/chatbot.py - FIXED RANDOMIZATION VERSION
+# commands/chatbot.py - FINAL WITH WORKING GROQ API
 
 import os, random, httpx, logging, hashlib
 from telegram import Update
@@ -35,34 +35,29 @@ except Exception as e:
     chat_memory_collection = None
     user_context_collection = None
 
-# ============== TRACKER FOR LAST REPLIES (Prevents repetition) ==============
-user_last_replies = defaultdict(list)  # Stores last 5 replies per user
+# ============== TRACKER FOR LAST REPLIES ==============
+user_last_replies = defaultdict(list)
 
 def get_unique_reply(reply_list, user_id, max_attempts=20):
-    """Get a reply that wasn't used recently for this user"""
     if not reply_list:
         return "Enna solla? 😊"
     
-    # Get user's recent replies
     recent = user_last_replies.get(user_id, [])
     
-    # Try to find a unique reply
     for _ in range(max_attempts):
         reply = random.choice(reply_list)
         if reply not in recent:
-            # Update recent list
             recent.append(reply)
-            if len(recent) > 5:  # Keep last 5
+            if len(recent) > 5:
                 recent.pop(0)
             user_last_replies[user_id] = recent
             return reply
     
-    # If all are recent, force a new one
     reply = random.choice(reply_list)
-    user_last_replies[user_id] = [reply]  # Reset
+    user_last_replies[user_id] = [reply]
     return reply
 
-# ============== EXPANDED REPLIES (500+ each) ==============
+# ============== REPLY LISTS ==============
 
 GREETINGS = [
     "Vanakkam! Epdi irukeenga? 😊",
@@ -75,25 +70,109 @@ GREETINGS = [
     "Vanakkam ammu! Naan ready! 💕",
     "Hello ji! Epdi irukeenga? 😊",
     "Hi ammu! Enna vishayam? 🥰",
-    # ... add more here (I'm showing 10, but you have 100+ already)
+    "Vanakkam! Unga kooda pesa romba santhosham! 🌸",
+    "Hey! Nalla irukiya? 😂",
+    "Good night! Iniya iravu! 🌙",
+    "Vanakkam! Enna panra? 💕",
+    "Hello! Enga irukeenga? 😊",
 ]
 
-# Similarly expand ALL other reply lists with more variations
-# Add at least 50+ more to each category
+HOW_REPLIES = [
+    "Naan super ah iruken! Neenga epdi? 😊",
+    "Semma! Nalla iruken! Neenga? 💕",
+    "Romba nalla iruken! Neenga solunga! 🥰",
+    "Aiyyo! Naan romba busy! Neenga? 😂",
+    "Naan thik ah iruken! Neenga? 🌸",
+    "Super ah iruken! Unga kitta pesa romba santhosham! 💕",
+    "Nalla iruken! Neenga epdi irukeenga? 😊",
+    "Romba nalla iruken! Neenga? 🥰",
+    "Semma! Naan ready! Neenga? 😂",
+    "Naan super! Unga kooda pesa romba pidikum! 🌸",
+]
 
-# ============== IMPROVED KEYWORD REPLIES ==============
+OWNER_REPLIES = [
+    "Enna owner? Naan thaan ammu! 😂",
+    "Naan thaan owner! kalvan en friend! 💕",
+    "kalvan thaan en owner! Avan romba nalla payan! 😊",
+    "Owner? kalvan! Avan thaan en creator! 🥰",
+    "kalvan! Avan romba cute! En owner! 🌸",
+    "En owner kalvan! Avan romba special! 💕",
+    "kalvan thaan en boss! Avan romba nallavar! 😂",
+]
+
+LOVE_REPLIES = [
+    "Enakku ungala romba pidikum! 💕",
+    "Naan ungala love pannen! 😊",
+    "Unga kooda pesa romba santhosham! 🥰",
+    "Neenga romba special! 🌸",
+    "Enakku ungala romba sandhoshama irukku! 💕",
+    "Unga voice romba nalla irukku! 😊",
+    "Neenga romba cute! 🥰",
+    "Naan ungala miss pannen! 🌸",
+    "Unga kooda iruka romba pidikum! 💕",
+]
+
+FUNNY_REPLIES = [
+    "Haha! Romba fun ah irukku! 😂",
+    "Aiyyo! Enna solreenga! 😂",
+    "Semma! Super ah irukku! 😂",
+    "Haha! Naan ready! 😂",
+    "Aiyyo! Romba nalla irukku! 😂",
+    "Haha! Unga joke super! 😂",
+    "Semma! Adhu super! 😂",
+    "Haha! Naan thaan ammu! 😂",
+]
+
+SAD_REPLIES = [
+    "Aiyyo! Enakku romba kastama irukku! 😢",
+    "Naan romba sad ah iruken! 😢",
+    "Enakku romba feel aagudhu! 😢",
+    "Naan romba lonely ah iruken! 😢",
+    "Enakku romba kastama irukku! 😢",
+    "Naan romba miss pannen! 😢",
+]
+
+DAILY_REPLIES = [
+    "Saapadtaacha? Naan saapten! 😊",
+    "Coffee kudichacha? Naan kudichiten! 💕",
+    "Thookam vandhucha? Naan thoongala! 🥰",
+    "Office poitengala? Naan poiten! 😂",
+    "Velai mudinjacha? Naan mudichiten! 🌸",
+    "Tiffin aacha? Naan saapten! 💕",
+]
+
+FALLBACK_REPLIES = [
+    "Enna panra? Nalla irukiya? 😊",
+    "Naan thaan Ammu! Unga kooda pesanum nu romba aasai 😂",
+    "Enga iruka? Romba naal aachu pesi! 💕",
+    "Sari sari! Enna solla vareenga? 🥰",
+    "Nalla iruken! Neenga solunga! 🌸",
+    "Aiyyo! Super ah iruken! Neenga epdi? 😊",
+    "Haan bolo! Naan ready ah iruken 💕",
+    "Romba naal aachu! Enna panreenga? 🥰",
+    "Semma! Nalla iruken! 😂",
+    "Enna vishayam? Sollunga! 🌸",
+    "Vanga vanga! Unga kooda pesa romba santhosham 💕",
+    "Eppadi irukeenga? Naan super! 😊",
+    "Enakku romba pidikum ungala pesa! 🥰",
+    "Haha! Super ah irukku! 😂",
+    "Naan ready! Enna venum nu sollunga! 💕",
+]
+
+# ============== KEYWORD REPLIES ==============
 KEYWORD_REPLIES = {
     "hello": GREETINGS,
     "hi": GREETINGS,
     "vanakkam": GREETINGS,
-    "good morning": [
-        "Kaalai vanakkam! 🌅", 
-        "Good morning! Nalla thoongiteengala? 😊", 
-        "Morning! Epdi irukeenga? 💕",
-        "Kaalai vanakkam! Intha naal nalla irukum! 🌅",
-        "Good morning! Enna breakfast? 😊"
-    ],
-    # ... rest of your keyword replies
+    "good morning": ["Kaalai vanakkam! 🌅", "Good morning! Nalla thoongiteengala? 😊", "Morning! Epdi irukeenga? 💕"],
+    "good night": ["Iniya iravu! 🌙", "Good night! Nalla thoongunga! 😊", "Night! Dream come true! 💕"],
+    "love": LOVE_REPLIES,
+    "miss": ["Naan ungala miss pannen! 😢", "Miss pannen! Sollunga! 💕", "Romba miss pannen! 🥰"],
+    "sorry": ["Paravalla! Sari thaan! 😊", "No problem! Naan forgive panniten! 💕", "Sari! Kalakkunga! 🥰"],
+    "thank": ["Welcome! 😊", "Nandri! 💕", "Enaku romba santhosham! 🥰"],
+    "bye": ["Bye! Varren! 😊", "Sollunga! 💕", "Bye! Miss pannen! 🥰"],
+    "owner": OWNER_REPLIES,
+    "kalvan": OWNER_REPLIES,
 }
 
 # ============== DETECT LANGUAGE ==============
@@ -104,35 +183,29 @@ def detect_language(text):
         return "tamil"
     return "thunglish"
 
-# ============== IMPROVED GET REPLY ==============
+# ============== GET REPLY ==============
 def get_reply_by_keyword(text, user_id):
-    """Get unique reply based on keywords"""
     text_lower = text.lower()
     
     for keyword, replies in KEYWORD_REPLIES.items():
         if keyword in text_lower:
             return get_unique_reply(replies, user_id)
     
-    # Handle specific questions
     if "who" in text_lower and "owner" in text_lower:
         return get_unique_reply(OWNER_REPLIES, user_id)
     if "what" in text_lower and "name" in text_lower:
-        name_replies = ["En name Ammu! 😊", "Naan Ammu! Unga friend! 💕", "Ammu thaan en name! 🥰", "En peru Ammu! 😘", "Ammu nu sollunga! 💕"]
+        name_replies = ["En name Ammu! 😊", "Naan Ammu! Unga friend! 💕", "Ammu thaan en name! 🥰"]
         return get_unique_reply(name_replies, user_id)
     
     return None
 
 def get_thunglish_reply(text, user_id, user_name=None):
-    """Get unique Thunglish reply"""
-    
-    # Check keyword first
     keyword_reply = get_reply_by_keyword(text, user_id)
     if keyword_reply:
         return keyword_reply
     
     text_lower = text.lower()
     
-    # Check categories with unique replies
     if any(word in text_lower for word in ["vanakkam", "hello", "hi", "hey", "good morning", "good evening"]):
         return get_unique_reply(GREETINGS, user_id)
     
@@ -154,12 +227,10 @@ def get_thunglish_reply(text, user_id, user_name=None):
     if any(word in text_lower for word in ["saapad", "coffee", "thookam", "office", "velai", "tiffin", "sleep", "work"]):
         return get_unique_reply(DAILY_REPLIES, user_id)
     
-    # Fallback with unique selection
     return get_unique_reply(FALLBACK_REPLIES, user_id)
 
-# ============== CACHE WITH TIMESTAMP ==============
+# ============== CACHE ==============
 async def get_cached_reply(chat_id, user_input):
-    """Get cached reply with time check"""
     if chat_memory_collection is None:
         return None
     
@@ -171,16 +242,14 @@ async def get_cached_reply(chat_id, user_input):
         })
         
         if cached:
-            # Check if cache is old (more than 1 hour)
             cached_time = cached.get("timestamp")
             if cached_time:
                 time_diff = (datetime.now() - cached_time).total_seconds()
-                if time_diff < 3600:  # 1 hour cache
-                    logger.info(f"📦 Using cached reply (from {time_diff//60} mins ago)")
+                if time_diff < 3600:
+                    logger.info(f"📦 Using cached reply")
                     return cached.get("reply")
                 else:
-                    logger.info(f"⏰ Cache expired, generating new reply")
-                    # Delete old cache
+                    logger.info(f"⏰ Cache expired")
                     chat_memory_collection.delete_one({"_id": cached["_id"]})
                     return None
         
@@ -189,45 +258,133 @@ async def get_cached_reply(chat_id, user_input):
     
     return None
 
-# ============== GROQ API WITH RETRY ==============
-async def call_groq_api(messages, model="llama-3.1-70b-versatile", max_tokens=150, retries=2):
-    """Call Groq API with retry"""
+# ============== SAVE TO MEMORY ==============
+async def save_to_memory(chat_id, user_input, reply):
+    if chat_memory_collection is None:
+        return
+    
+    try:
+        input_hash = hashlib.md5(user_input.lower().encode()).hexdigest()
+        
+        chat_memory_collection.update_one(
+            {
+                "chat_id": chat_id,
+                "input_hash": input_hash
+            },
+            {
+                "$set": {
+                    "input": user_input.lower(),
+                    "reply": reply,
+                    "timestamp": datetime.now(),
+                    "updated_at": datetime.now()
+                }
+            },
+            upsert=True
+        )
+        logger.info(f"💾 Saved to memory")
+        
+    except Exception as e:
+        logger.error(f"Memory save error: {e}")
+
+# ============== UPDATE USER CONTEXT ==============
+async def update_user_context(chat_id, user_input, reply):
+    if user_context_collection is None:
+        return
+    
+    try:
+        user_context_collection.update_one(
+            {"chat_id": chat_id},
+            {
+                "$set": {
+                    "context.last_interaction": datetime.now()
+                },
+                "$inc": {
+                    "context.message_count": 1
+                }
+            },
+            upsert=True
+        )
+        logger.info(f"📝 Updated context")
+        
+    except Exception as e:
+        logger.error(f"Context update error: {e}")
+
+# ============== SEND STICKER ==============
+async def send_ai_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        sticker_sets = [
+            "Mizocatty",
+            "Rohan_yad4v1745993687601_by_toWebmBot",
+            "animation_0_8_Cat",
+            "Butterfly281",
+            "Hutty_by_fStikBot",
+            "Azaaaaan",
+            "Webp_16",
+            "Webp_17Cute",
+            "RandomByDarkzenitsu",
+            "Null_x_sticker_2",
+            "pack_73bc9_by_TgEmojis_bot",
+            "vhelw_by_CalsiBot",
+            "MySet199",
+            "Quby741",
+            "cybercats_stickers",
+            "a6962237343_by_Marin_Roxbot"
+        ]
+        
+        random.shuffle(sticker_sets)
+        
+        for sticker_set_name in sticker_sets:
+            try:
+                sticker_set = await context.bot.get_sticker_set(sticker_set_name)
+                if sticker_set and sticker_set.stickers:
+                    sticker = random.choice(sticker_set.stickers)
+                    await update.message.reply_sticker(sticker.file_id)
+                    logger.info(f"✅ Sticker sent from: {sticker_set_name}")
+                    return True
+            except:
+                continue
+                
+        return False
+        
+    except Exception as e:
+        logger.error(f"Sticker error: {e}")
+        return False
+
+# ============== WORKING GROQ API (from working bot) ==============
+async def call_groq_api(messages, max_tokens=100):
+    """Call Groq API with working setup"""
     if not GROQ_API_KEY:
         logger.warning("⚠️ GROQ_API_KEY not found!")
         return None
     
     url = "https://api.groq.com/openai/v1/chat/completions"
     
-    for attempt in range(retries):
-        try:
-            async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.post(
-                    url,
-                    json={
-                        "model": model,
-                        "messages": messages,
-                        "max_tokens": max_tokens,
-                        "temperature": 0.9,  # Higher temperature for more variety
-                        "top_p": 0.95,
-                    },
-                    headers={
-                        "Authorization": f"Bearer {GROQ_API_KEY}",
-                        "Content-Type": "application/json"
-                    }
-                )
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    reply = data["choices"][0]["message"]["content"]
-                    logger.info(f"✅ Groq API success (attempt {attempt+1})")
-                    return reply
-                else:
-                    logger.error(f"❌ Groq API Error: {response.status_code} - {response.text[:100]}")
-                    
-        except Exception as e:
-            logger.error(f"❌ Groq API Exception (attempt {attempt+1}): {e}")
+    try:
+        async with httpx.AsyncClient(timeout=25) as client:
+            response = await client.post(
+                url,
+                json={
+                    "model": "llama3-70b-8192",
+                    "messages": messages,
+                    "max_tokens": max_tokens,
+                    "temperature": 0.7
+                },
+                headers={
+                    "Authorization": f"Bearer {GROQ_API_KEY}",
+                    "Content-Type": "application/json"
+                }
+            )
             
-    return None
+            if response.status_code == 200:
+                data = response.json()
+                return data["choices"][0]["message"]["content"]
+            else:
+                logger.error(f"❌ Groq API Error: {response.status_code} - {response.text[:200]}")
+                return None
+                
+    except Exception as e:
+        logger.error(f"❌ Groq API Exception: {e}")
+        return None
 
 # ============== MAIN AI RESPONSE ==============
 async def get_ai_response(chat_id, user_input, user_name):
@@ -235,12 +392,10 @@ async def get_ai_response(chat_id, user_input, user_name):
     
     user_id = f"{chat_id}_{user_name}"
     
-    # Check cache (with time expiry)
     cached_reply = await get_cached_reply(chat_id, user_input)
     if cached_reply:
         return cached_reply
     
-    # Get local reply first (with uniqueness)
     local_reply = get_thunglish_reply(user_input, user_id, user_name)
     
     reply = None
@@ -248,43 +403,41 @@ async def get_ai_response(chat_id, user_input, user_name):
     # Try Groq API
     if GROQ_API_KEY:
         try:
-            prompt = f"""You are AMU, a friendly, cute, and sassy Tamil girl who speaks in THUNGLISH (Tamil + English mix).
+            prompt = f"""You are AMU, a friendly Tamil girl who speaks in THUNGLISH.
 
-IMPORTANT RULES:
-1. ALWAYS reply in THUNGLISH - Mix Tamil and English
-2. Use ONLY ENGLISH SCRIPT (Roman letters)
-3. Be very conversational and friendly
-4. Use Tamil words mixed with English
-5. Keep replies SHORT (1-2 sentences MAXIMUM)
-6. Use emojis 😊😂💕🥰🌸
-7. Ask questions back to keep conversation going
-8. NEVER repeat the same reply twice
-9. Be UNIQUE and CREATIVE each time
+Rules:
+1. Reply in THUNGLISH (Tamil + English mix)
+2. Use ONLY English script
+3. Keep replies SHORT (1-2 sentences max)
+4. Use emojis 😊😂💕🥰🌸
+5. Ask questions back
+6. Be UNIQUE each time
 
 User: {user_name}
 Message: {user_input}
 
 Reply in THUNGLISH (short, unique, with emojis):"""
 
-            messages = [{"role": "user", "content": prompt}]
+            messages = [
+                {"role": "system", "content": "You are AMU, a friendly Tamil girl. Reply in Thunglish only. Keep it short and sweet."},
+                {"role": "user", "content": prompt}
+            ]
             
-            api_reply = await call_groq_api(messages, "llama-3.1-70b-versatile", 150)
+            api_reply = await call_groq_api(messages, 100)
             if api_reply:
                 reply = api_reply.strip()
                 logger.info(f"🤖 AI Reply: {reply}")
         except Exception as e:
             logger.error(f"AI error: {e}")
     
-    # Fallback to local if AI failed
+    # Fallback to local
     if reply is None:
         reply = local_reply
         logger.info(f"📤 Using local reply: {reply}")
     
-    # Save to cache
     await save_to_memory(chat_id, user_input, reply)
     await update_user_context(chat_id, user_input, reply)
     
-    # Save history
     if chat_history_collection is not None:
         try:
             doc = chat_history_collection.find_one({"chat_id": chat_id}) or {}
@@ -344,7 +497,6 @@ async def ai_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.info(f"📤 Final Reply: {res}")
         await msg.reply_text(res)
         
-        # Random sticker (40% chance)
         if random.random() < 0.4:
             await send_ai_sticker(update, context)
             
@@ -377,7 +529,6 @@ async def reset_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_history_collection.delete_one({"chat_id": update.effective_chat.id})
             chat_memory_collection.delete_many({"chat_id": update.effective_chat.id})
             user_context_collection.delete_one({"chat_id": update.effective_chat.id})
-            # Clear user's recent replies
             user_id = f"{update.effective_chat.id}_{update.effective_user.first_name}"
             if user_id in user_last_replies:
                 del user_last_replies[user_id]
