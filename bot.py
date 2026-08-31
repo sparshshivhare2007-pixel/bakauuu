@@ -39,7 +39,7 @@ from commands.chatbot import (
     ai_message_handler, 
     reset_chat, 
     # show_language,
-    chat_stats
+    # chat_stats
 )
 from commands.couple import couple
 from commands.shop import items, item, gift
@@ -220,7 +220,7 @@ def main():
     app.add_handler(CommandHandler("ask", ask_ai))          # Ask anything
     app.add_handler(CommandHandler("reset", reset_chat))    # Clear chat history & memory
     # app.add_handler(CommandHandler("language", show_language)) # Detect language
-    app.add_handler(CommandHandler("stats", chat_stats))    # Show chat statistics
+   #  app.add_handler(CommandHandler("stats", chat_stats))    # Show chat statistics
     
     # ---------- AI MESSAGE HANDLER ----------
     app.add_handler(
