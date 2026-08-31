@@ -38,7 +38,7 @@ from commands.chatbot import (
     ask_ai, 
     ai_message_handler, 
     reset_chat, 
-    show_language,
+    # show_language,
     chat_stats
 )
 from commands.couple import couple
@@ -219,7 +219,7 @@ def main():
     # ---------- AI COMMANDS (GROQ + THUNGLISH + SMART MEMORY) ----------
     app.add_handler(CommandHandler("ask", ask_ai))          # Ask anything
     app.add_handler(CommandHandler("reset", reset_chat))    # Clear chat history & memory
-    app.add_handler(CommandHandler("language", show_language)) # Detect language
+    # app.add_handler(CommandHandler("language", show_language)) # Detect language
     app.add_handler(CommandHandler("stats", chat_stats))    # Show chat statistics
     
     # ---------- AI MESSAGE HANDLER ----------
